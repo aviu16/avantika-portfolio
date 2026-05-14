@@ -567,6 +567,23 @@
   body.carousel-mode .horizon,
   body.carousel-mode .meadow { opacity: 0; pointer-events: none; }
 
+  /* === CAROUSEL-MODE PERF: kill ALL scroll-page atmosphere ===
+     The carousel overlay (z-index 200) covers everything below it, but
+     the browser still computes animations + paints for hidden elements.
+     `display: none` removes them from the rendering tree entirely — huge
+     GPU win during carousel scroll. */
+  body.carousel-mode .sky,
+  body.carousel-mode .sun,
+  body.carousel-mode .stars,
+  body.carousel-mode .sky-grain,
+  body.carousel-mode .shooting-stars,
+  body.carousel-mode .bird-flock,
+  body.carousel-mode .clouds,
+  body.carousel-mode .wisps,
+  body.carousel-mode .pet-duo {
+    display: none !important;
+  }
+
   /* Dark mode: dim horizon, deeper meadow tones */
   body[data-theme="dark"] .horizon {
     opacity: 0.6;
