@@ -1501,12 +1501,14 @@
     will-change: transform;
     transform: translateZ(0);
   }
-  /* Pause atmospheric animations during active horizontal scroll so the GPU
-     can focus on the snap motion. Resumes ~180ms after scroll stops. */
-  .carousel-overlay.is-scrolling .carousel-clouds .cl,
+  /* During active scroll, ENTIRELY HIDE the in-carousel atmosphere — clouds,
+     sun, stars. They reappear 180ms after the scroll stops. This is much
+     cheaper than just pausing animations because the browser stops painting
+     them at all. */
   .carousel-overlay.is-scrolling .carousel-clouds,
-  .carousel-overlay.is-scrolling ~ .carousel-stars .cs {
-    animation-play-state: paused;
+  .carousel-overlay.is-scrolling .carousel-sun,
+  .carousel-overlay.is-scrolling ~ .carousel-stars {
+    visibility: hidden;
   }
   .carousel-clouds .cl svg { display: block; width: 100%; }
   .carousel-clouds .cl svg path.fill { fill: var(--c-cloud, rgba(255, 255, 255, 0.96)); }
@@ -2031,13 +2033,15 @@
   .card {
     flex: 0 0 500px;
     /* Cards sit fully visible — top + bottom edges with rounded corners,
-       clear space below before the viewport edge (Natalie's pattern).
-       Vertical math: 88px nav gap + 40px bottom = 128px reserved. */
+       clear space below before the viewport edge (Natalie's pattern). */
     height: min(940px, calc(100vh - 128px));
     min-height: 580px;
-    /* Contain repaints to the card box + promote to GPU layer — keeps
-       scrolling smooth when many cards are visible. */
-    contain: layout paint;
+    /* Aggressive containment: layout + paint + style + size scoped, AND
+       content-visibility: auto so the browser skips off-screen cards
+       entirely. This is the biggest perf knob for long horizontal lists. */
+    contain: layout paint style;
+    content-visibility: auto;
+    contain-intrinsic-size: 500px 800px;
     transform: translateZ(0);
     will-change: transform;
     border-radius: 56px;
