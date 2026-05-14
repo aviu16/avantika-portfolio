@@ -2356,21 +2356,19 @@
     color: rgba(255, 255, 255, 0.6);
     letter-spacing: -0.003em;
   }
-  /* Contact card uses serif headline like the about card */
+  /* Contact card serif headline (sizing only — color handled by .card-mustard/.card-twilight rules earlier that respond to light/dark mode). */
   .card-twilight .card-headline {
     font-family: var(--serif);
     font-weight: 500;
     font-size: 24px;
     line-height: 1.14;
     letter-spacing: -0.012em;
-    color: #FFFFFF;
     margin: 0 0 12px;
   }
   .card-twilight .card-section-text {
     font-family: var(--body);
     font-size: 13.5px;
     line-height: 1.55;
-    color: rgba(255, 255, 255, 0.7);
     margin: 0 0 6px;
     letter-spacing: -0.005em;
   }
@@ -2443,15 +2441,18 @@
     letter-spacing: 0.04em;
     color: inherit;
   }
-  .card-twilight .card-mini-chip { background: rgba(255, 255, 255, 0.14); }
-  .card-twilight .card-headline,
-  .card-twilight .card-section-title,
-  .card-twilight .card-exp-title { color: #F7F4F0; }
-  .card-twilight .card-section-text { color: rgba(247, 244, 240, 0.7); }
-  .card-twilight .card-exp-row { color: rgba(247, 244, 240, 0.8); }
-  .card-twilight .card-exp-row .yrs { color: rgba(247, 244, 240, 0.45); }
-  .card-twilight .card-exp-row .role-line strong { color: #F7F4F0; }
-  .card-twilight .card-exp-row .role-line .sub { color: rgba(247, 244, 240, 0.55); }
+  /* These cream-text rules were for the OLD solid-black twilight card.
+     Now that it's glass, only apply them in dark mode (otherwise the
+     light-pink glass card has invisible cream text). */
+  body[data-theme="dark"] .card-twilight .card-mini-chip { background: rgba(255, 255, 255, 0.14); }
+  body[data-theme="dark"] .card-twilight .card-headline,
+  body[data-theme="dark"] .card-twilight .card-section-title,
+  body[data-theme="dark"] .card-twilight .card-exp-title { color: #F7F4F0; }
+  body[data-theme="dark"] .card-twilight .card-section-text { color: rgba(247, 244, 240, 0.7); }
+  body[data-theme="dark"] .card-twilight .card-exp-row { color: rgba(247, 244, 240, 0.8); }
+  body[data-theme="dark"] .card-twilight .card-exp-row .yrs { color: rgba(247, 244, 240, 0.45); }
+  body[data-theme="dark"] .card-twilight .card-exp-row .role-line strong { color: #F7F4F0; }
+  body[data-theme="dark"] .card-twilight .card-exp-row .role-line .sub { color: rgba(247, 244, 240, 0.55); }
 
   /* Contact links inside contact card */
   .card-contact-link {
