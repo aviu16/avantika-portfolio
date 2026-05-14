@@ -1,0 +1,4096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avantika Linguini</title>
+<meta name="description" content="Avantika Linguini — Toronto.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --display: 'Funnel Display', -apple-system, sans-serif;
+    --serif:   'Newsreader', 'New York', Georgia, serif;
+    --body:    'Inter', -apple-system, sans-serif;
+    --mono:    'JetBrains Mono', ui-monospace, monospace;
+
+    --ink:        #1A2233;
+    --ink-soft:   #5C6776;
+    --rule:       rgba(26, 34, 51, 0.14);
+    --paper:      #FFFFFF;
+    --accent:     #C95F7E;
+
+    --bg-top:     #A8D5F0;
+    --bg-mid:     #C8E2F2;
+    --bg-bot:     #E8F2FA;
+    --cloud:      rgba(255, 255, 255, 0.97);
+    --cloud-edge: #FFFFFF;
+    --sun-core:   rgba(255, 245, 220, 0.95);
+    --sun-glow:   rgba(255, 220, 180, 0.4);
+    --sun-top:    78%;
+    --stars:      0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--body);
+    color: var(--ink);
+    font-weight: 400;
+    line-height: 1.55;
+    overflow-x: hidden;
+    background: var(--bg-mid);
+    min-height: 100vh;
+    /* Crisper Inter rendering on macOS — same as Natalie's site. Without
+       this, Inter renders chunky/grey-fringed and looks "cheap". */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .sky {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bot) 100%);
+    transition: background 0.3s linear;
+    pointer-events: none;
+  }
+
+  .sun {
+    position: fixed;
+    top: var(--sun-top);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 640px; height: 640px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--sun-core) 0%, var(--sun-glow) 30%, transparent 65%);
+    z-index: 1;
+    pointer-events: none;
+    filter: blur(6px);
+    transition: top 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s linear;
+  }
+
+  .stars { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: var(--stars); transition: opacity 0.6s linear; }
+  .star { position: absolute; width: 2px; height: 2px; background: #FFF; border-radius: 50%; box-shadow: 0 0 6px rgba(255,255,255,0.9); animation: twinkle 4s ease-in-out infinite; }
+  @keyframes twinkle { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* === PAINTED GRAIN — subtle SVG noise layered over the sky so the
+     gradient reads as illustrated paper rather than CSS. */
+  .sky-grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    opacity: 0.18;
+    mix-blend-mode: soft-light;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0.7 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 320px 320px;
+  }
+
+  /* === SHOOTING STAR — single comet head + linear trail.
+     A new .shooting-star element is dropped in by JS at random intervals
+     (30–90s). The animation fires once and the element is cleaned up. */
+  .shooting-stars { position: fixed; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; }
+  .shooting-star {
+    position: absolute;
+    width: 320px; height: 3px;
+    background: linear-gradient(to right,
+      transparent 0%,
+      rgba(255, 235, 195, 0.0) 3%,
+      rgba(255, 240, 200, 0.4) 50%,
+      rgba(255, 245, 210, 0.85) 85%,
+      rgba(255, 250, 230, 1) 100%);
+    border-radius: 999px;
+    opacity: 0;
+    will-change: transform, opacity;
+    transform: translate(0, 0) rotate(22deg);
+    filter: drop-shadow(0 0 10px rgba(255, 240, 200, 0.95));
+  }
+  .shooting-star::after {
+    content: "";
+    position: absolute;
+    right: -5px; top: -6px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFFFFF 0%, #FFFAE6 30%, #FFE7B0 60%, transparent 80%);
+    box-shadow: 0 0 22px rgba(255, 240, 200, 1), 0 0 40px rgba(255, 230, 180, 0.7);
+  }
+  @keyframes shoot {
+    0%   { opacity: 0; transform: translate(0, 0) rotate(22deg); }
+    6%   { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(1100px, 440px) rotate(22deg); }
+  }
+  .shooting-star.firing { animation: shoot 2.6s cubic-bezier(0.18, 0.7, 0.3, 1) forwards; }
+  /* Lingering twinkle that the comet leaves behind at its landing point */
+  .star-residue {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #FFFAE6;
+    box-shadow: 0 0 10px rgba(255, 235, 180, 0.9);
+    opacity: 0;
+    animation: residue 6s ease-out forwards;
+  }
+  @keyframes residue {
+    0%   { opacity: 0; transform: scale(0.4); }
+    15%  { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.6); }
+  }
+  /* Dark mode = more shooting stars + brighter glow against navy */
+  body[data-theme="dark"] .shooting-star { filter: drop-shadow(0 0 10px rgba(255, 245, 220, 1)); }
+
+  /* === BIRD FLOCK — tiny V-formation crosses the sky every ~2 min.
+     Each bird is a CSS-only "M" silhouette; the whole flock animates as one. */
+  .bird-flock {
+    position: fixed; top: 18vh; left: -200px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .bird-flock.flying { animation: flock 28s linear forwards; }
+  @keyframes flock {
+    0%   { opacity: 0; transform: translateX(0); }
+    8%   { opacity: 1; }
+    92%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(calc(100vw + 400px)); }
+  }
+  .bird {
+    position: absolute;
+    width: 18px; height: 10px;
+    color: rgba(40, 50, 70, 0.55);
+    animation: flap 0.5s ease-in-out infinite;
+  }
+  .bird svg { width: 100%; height: 100%; display: block; }
+  .bird svg path { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  @keyframes flap {
+    0%, 100% { transform: scaleY(1); }
+    50%      { transform: scaleY(0.55); }
+  }
+  body[data-theme="dark"] .bird { color: rgba(220, 230, 245, 0.45); }
+
+  /* === PIXEL-ART PET DUO — mini Minecraft-style girl + sunflower companion.
+     Scripted entry sequence on page load:
+       1. Drops in from top of viewport
+       2. Hops on "Avantika" (left half of name)
+       3. Hops on "Linguini" (right half)
+       4. Slides down to bottom-right corner
+       5. Idle loop: tries to jump but can't (hints user to scroll)
+     The sunflower head still tracks the sun (palette state). */
+  /* Entry route is driven by a CSS @keyframes — it can NEVER get stuck,
+     the browser guarantees it runs to completion. The keyframe uses
+     CSS custom properties (--pet-aX/--pet-iX/--pet-topY) that JS sets
+     once at the start, so positions are letter-precise. After entry,
+     JS takes over for scroll-driven moves via the same CSS transition
+     fallback. */
+  .pet-duo {
+    position: fixed;
+    left: 50%; top: -100px;
+    z-index: 60;
+    width: 62px; height: 54px;
+    pointer-events: auto;
+    cursor: pointer;
+    transform: translateX(-50%);
+    transition: top 0.85s cubic-bezier(0.42, 0, 0.30, 1.1),
+                left 0.85s cubic-bezier(0.42, 0, 0.30, 1.1);
+    will-change: top, left;
+  }
+  /* When `.hopping` is on, the sprite bobs UP-DOWN over the same 0.85s as
+     the CSS transition. That + the transition = visible jump arc. */
+  @keyframes hop-arc {
+    0%   { transform: translateY(0); }
+    50%  { transform: translateY(-32px); }
+    100% { transform: translateY(0); }
+  }
+  .pet-duo.hopping .pet-girl,
+  .pet-duo.hopping .pet-flower { animation: hop-arc 0.85s cubic-bezier(0.42, 0, 0.58, 1); }
+  /* Legacy squash/stretch + facing rules removed — they were conflicting with
+     the .hopping animation on .pet-girl. Direction flip is now bare bones. */
+  .pet-duo[data-facing="left"]:not(.hopping):not(.happy) .pet-girl { transform: scaleX(-1); }
+  .pet-girl, .pet-flower {
+    position: absolute;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  .pet-girl   { left: 0;   bottom: 0; width: 34px; height: 47px; }
+  .pet-flower { right: 0; bottom: 0; width: 26px; height: 40px; }
+  .pet-flower-head {
+    transform-origin: 50% 70%;
+    transform: rotate(var(--head-tilt, 0deg));
+    transition: transform 0.5s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  /* Soft shadow under the duo's feet — shrinks on jumps for depth */
+  .pet-shadow {
+    position: absolute;
+    left: 50%; bottom: -4px;
+    width: 46px; height: 5px;
+    margin-left: -23px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.28) 0%, transparent 70%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* JS-driven jittering — see scripts. Dust puff still cycles via CSS. */
+  .pet-dust {
+    position: absolute;
+    left: 50%; bottom: -2px;
+    width: 12px; height: 4px;
+    margin-left: -6px;
+    background: radial-gradient(ellipse, rgba(180, 180, 195, 0.65) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* (dust-puff keyframes + .jittering rules consolidated below) */
+
+  /* Happy idle: tiny gentle bob driven by transform (won't fight JS top/left) */
+  @keyframes pet-happy-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-3px); }
+  }
+  .pet-duo.happy { animation: pet-happy-bob 2.4s ease-in-out infinite; }
+  /* Jittering: stuck-at-bottom frantic tries-to-jump loop (hints at scroll).
+     Goes through anticipation → tiny launch → fail → land → pause, repeat. */
+  @keyframes pet-jitter {
+    0%        { transform: translateX(-50%) translateY(0)   scaleY(1); }
+    12%       { transform: translateX(-50%) translateY(3px) scaleY(0.82); }
+    22%       { transform: translateX(-50%) translateY(-8px) scaleY(1.08); }
+    30%       { transform: translateX(-50%) translateY(-4px) scaleY(1); }
+    38%       { transform: translateX(-50%) translateY(2px) scaleY(0.92); }
+    46%       { transform: translateX(-50%) translateY(0)   scaleY(1); }
+    62%       { transform: translateX(-50%) translateY(2px) scaleY(0.85); }
+    72%       { transform: translateX(-50%) translateY(-5px) scaleY(1.06); }
+    82%       { transform: translateX(-50%) translateY(0); }
+    100%      { transform: translateX(-50%) translateY(0); }
+  }
+  .pet-duo.jittering { animation: pet-jitter 2.1s ease-in-out infinite; }
+  /* Dust puff timed with each jitter attempt */
+  .pet-duo.jittering .pet-dust {
+    animation: dust-puff 2.1s ease-out infinite;
+    animation-delay: 0.15s;
+  }
+  @keyframes dust-puff {
+    0%, 50%, 100% { opacity: 0; transform: scale(0.6) translateY(0); }
+    18%   { opacity: 0.9; transform: scale(1.3) translateY(2px); }
+    32%   { opacity: 0; transform: scale(2) translateY(5px); }
+    68%   { opacity: 0.7; transform: scale(1.2) translateY(2px); }
+    78%   { opacity: 0; transform: scale(1.8) translateY(5px); }
+  }
+  /* Tiny celebration sparkle when transitioning to happy */
+  @keyframes happy-spark {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    30%  { opacity: 1; transform: translateY(-12px) scale(1); }
+    100% { opacity: 0; transform: translateY(-24px) scale(0.6); }
+  }
+  .pet-spark {
+    position: absolute;
+    left: 50%; top: -6px;
+    width: 6px; height: 6px;
+    margin-left: -3px;
+    background: radial-gradient(circle, #FFF6C4 0%, #FFD86A 50%, transparent 75%);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 220, 130, 0.8);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .pet-duo.celebrating .pet-spark {
+    animation: happy-spark 0.9s ease-out forwards;
+  }
+
+  /* Sleeping state — flower head closes/desaturates, girl yawns */
+  .pet-duo.sleeping .pet-flower-head {
+    transform: rotate(calc(var(--head-tilt, 0deg) + 18deg)) translateY(3px) scale(0.82);
+    filter: saturate(0.45) brightness(0.6);
+  }
+  .pet-duo.sleeping .flower-eye {
+    /* Closed eyes — collapse to nothing, draw is replaced via CSS pseudo */
+    width: 0;
+    height: 0;
+  }
+  .pet-duo.sleeping .pet-girl { filter: brightness(0.7) saturate(0.7); }
+  .pet-duo.sleeping .pet-shadow { opacity: 0.4; }
+  /* Floating Z's when sleeping */
+  .pet-duo.sleeping::before {
+    content: "z";
+    position: absolute;
+    right: 4px; top: 0;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(220, 230, 245, 0.75);
+    animation: float-z 2.6s ease-in-out infinite;
+  }
+  .pet-duo.sleeping::after {
+    content: "z";
+    position: absolute;
+    right: 14px; top: -8px;
+    font-family: var(--display);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(220, 230, 245, 0.55);
+    animation: float-z 2.6s ease-in-out infinite 0.8s;
+  }
+  /* Drooping (golden hour) — flower tilts forward, girl looks slightly tired */
+  .pet-duo.drooping .pet-flower-head {
+    transform: rotate(calc(var(--head-tilt, 0deg) + 10deg)) translateY(2px);
+  }
+
+  /* === PET SUNFLOWER — cursor-tracking companion in the bottom-right.
+     Stem stays put; the FLOWER HEAD rotates to follow the cursor like a real
+     sunflower follows the sun. Droops at golden hour, closes at night. */
+  .pet-sunflower {
+    position: fixed;
+    right: 32px; bottom: 0;
+    width: 130px; height: 200px;
+    z-index: 50;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: filter 0.6s ease;
+  }
+  .sun-stem {
+    position: absolute;
+    left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    width: 30px; height: 120px;
+  }
+  .sun-stem svg { width: 100%; height: 100%; display: block; }
+  .sun-head {
+    position: absolute;
+    left: 50%; top: 0;
+    width: 90px; height: 90px;
+    margin-left: -45px;
+    transform-origin: 50% 95%;
+    transform: rotate(var(--head-tilt, 0deg));
+    transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .sun-head svg { width: 100%; height: 100%; display: block; }
+  .pet-sunflower.bouncing .sun-head { animation: sunflower-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes sunflower-bounce {
+    0%   { transform: rotate(var(--head-tilt, 0deg)) scale(1); }
+    50%  { transform: rotate(var(--head-tilt, 0deg)) scale(1.15); }
+    100% { transform: rotate(var(--head-tilt, 0deg)) scale(1); }
+  }
+  /* Sunset state — flower droops, looks tired */
+  .pet-sunflower.drooping .sun-head {
+    transform: rotate(calc(var(--head-tilt, 0deg) + 12deg)) translateY(6px);
+  }
+  .pet-sunflower.drooping .face .mouth { d: path("M 45 58 Q 50 56 55 58"); }
+  /* Night state — flower closes, eyes shut, ZZZ above */
+  .pet-sunflower.sleeping .sun-head {
+    transform: rotate(calc(var(--head-tilt, 0deg) + 18deg)) translateY(12px) scale(0.78);
+    filter: saturate(0.4) brightness(0.55);
+  }
+  .pet-sunflower.sleeping .eye {
+    /* Closed eyes — render as small horizontal arcs instead of dots */
+    r: 0;
+  }
+  .pet-sunflower.sleeping .eye-glint { display: none; }
+  .pet-sunflower.sleeping .closed-eye { display: block; }
+  .pet-sunflower .closed-eye { display: none; }
+  /* Tiny "z" sleeping marks */
+  .pet-sunflower.sleeping::before {
+    content: "z";
+    position: absolute;
+    left: 78%; top: 8%;
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(220, 230, 245, 0.7);
+    animation: float-z 3s ease-in-out infinite;
+  }
+  .pet-sunflower.sleeping::after {
+    content: "z";
+    position: absolute;
+    left: 92%; top: 2%;
+    font-family: var(--display);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(220, 230, 245, 0.5);
+    animation: float-z 3s ease-in-out infinite 1s;
+  }
+  @keyframes float-z {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50%      { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* === FIREFLY — only appears in dark mode. Drifts toward the cursor
+     with a soft delay, glows warm yellow, pulses gently. */
+  .firefly {
+    position: fixed;
+    left: 50%; top: 50%;
+    width: 8px; height: 8px;
+    z-index: 51;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease, left 0.8s cubic-bezier(0.22, 1, 0.36, 1), top 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  body[data-theme="dark"] .firefly { opacity: 1; }
+  .firefly-body {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFF7B8 0%, #FFD56A 50%, transparent 80%);
+    box-shadow:
+      0 0 14px rgba(255, 220, 130, 0.95),
+      0 0 28px rgba(255, 215, 120, 0.6),
+      0 0 60px rgba(255, 200, 90, 0.35);
+    animation: firefly-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes firefly-pulse {
+    0%, 100% { transform: scale(1);   opacity: 0.9; }
+    50%      { transform: scale(1.3); opacity: 1; }
+  }
+
+  /* === HAND-DRAWN WISP CURLS — tiny sketchy "wind" doodles drifting in the
+     sky alongside the clouds. Match the storybook spiral marks in the
+     reference (image 1). Stroke uses the same --cloud-edge palette so the
+     wisps shift sunrise→sunset along with everything else. */
+  .wisps {
+    position: fixed; inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .wisps .wisp {
+    position: absolute;
+    width: 60px; height: auto;
+    fill: none;
+    stroke: var(--cloud-edge, #FFFFFF);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.45;
+    transition: stroke 0.6s linear, opacity 0.6s linear;
+  }
+  .wisps .w1 { width: 65px; top: 14vh; left: -90px;  animation: drift-wisp 140s linear infinite;      }
+  .wisps .w2 { width: 42px; top: 22vh; left: -70px;  animation: drift-wisp 95s  linear infinite -20s; }
+  .wisps .w3 { width: 55px; top: 38vh; left: -80px;  animation: drift-wisp 115s linear infinite -50s; }
+  .wisps .w4 { width: 38px; top: 56vh; left: -60px;  animation: drift-wisp 105s linear infinite -75s; }
+  .wisps .w5 { width: 60px; top: 68vh; left: -85px;  animation: drift-wisp 125s linear infinite -30s; }
+  .wisps .w6 { width: 44px; top: 84vh; left: -70px;  animation: drift-wisp 100s linear infinite -10s; }
+  @keyframes drift-wisp {
+    to { transform: translateX(calc(100vw + 200px)); }
+  }
+  /* Dark mode = wisps fade to faint silver strokes */
+  body[data-theme="dark"] .wisps .wisp {
+    stroke: rgba(255, 255, 255, 0.18);
+    opacity: 0.6;
+  }
+
+  .clouds { position: fixed; inset: 0; pointer-events: none; z-index: 2; overflow: hidden; }
+  .cloud { position: absolute; transition: opacity 0.4s linear; }
+  .cloud svg { display: block; width: 100%; }
+  .cloud svg path.fill { fill: var(--cloud); }
+  .cloud svg path.silver { fill: none; stroke: var(--cloud-edge); stroke-width: 2.5; opacity: 0.9; }
+
+  .c1 { width: 380px; top: 10vh; left: -420px; animation: drift 110s linear infinite; opacity: 0.95; }
+  .c2 { width: 280px; top: 26vh; left: -320px; animation: drift 85s  linear infinite; animation-delay: -30s; opacity: 0.85; }
+  .c3 { width: 460px; top: 50vh; left: -500px; animation: drift 130s linear infinite; animation-delay: -55s; opacity: 0.8; }
+  .c4 { width: 340px; top: 72vh; left: -380px; animation: drift 95s  linear infinite; animation-delay: -10s; opacity: 0.9; }
+  .c5 { width: 400px; top: 90vh; left: -440px; animation: drift 105s linear infinite; animation-delay: -45s; opacity: 0.75; }
+
+  @keyframes drift { to { transform: translateX(calc(100vw + 600px)); } }
+
+  /* === DISTANT HORIZON — soft hill silhouette ~35% from the viewport bottom.
+     Two layered hills (far + near) for atmospheric depth. Hidden in carousel mode. */
+  .horizon {
+    position: fixed;
+    left: 0; right: 0;
+    bottom: 140px;
+    height: 100px;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.85;
+    transition: opacity 0.4s linear;
+  }
+  .horizon svg {
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .horizon .far-hill {
+    fill: var(--horizon-far, rgba(140, 160, 185, 0.55));
+    transition: fill 0.6s linear;
+  }
+  .horizon .near-hill {
+    fill: var(--horizon-near, rgba(110, 135, 165, 0.7));
+    transition: fill 0.6s linear;
+  }
+
+  /* === FOREGROUND MEADOW — daisies, grass, wildflowers at viewport bottom.
+     Fixed band ~150px tall. Colors shift sunrise → sunset. Hidden in carousel mode. */
+  .meadow {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 150px;
+    z-index: 4;
+    pointer-events: none;
+    transition: opacity 0.4s linear;
+  }
+  .meadow-svg { width: 100%; height: 100%; display: block; }
+  .meadow .grass-back {
+    fill: var(--grass-back, #4F7E3C);
+    transition: fill 0.6s linear;
+  }
+  .meadow .grass-front {
+    fill: var(--grass-front, #6BA34D);
+    transition: fill 0.6s linear;
+  }
+  .meadow .grass-blades line {
+    stroke: var(--grass-blade, rgba(56, 95, 42, 0.65));
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    transition: stroke 0.6s linear;
+  }
+  .meadow .daisies .petal {
+    fill: var(--daisy-petal, #FFFFFF);
+    transition: fill 0.6s linear;
+  }
+  .meadow .daisies .center {
+    fill: var(--daisy-center, #F4B73E);
+    transition: fill 0.6s linear;
+  }
+  .meadow .wildflowers .yellow {
+    fill: var(--flower-yellow, #F2C94C);
+    transition: fill 0.6s linear;
+  }
+  .meadow .wildflowers .pink {
+    fill: var(--flower-pink, #E89BB5);
+    transition: fill 0.6s linear;
+  }
+  .meadow .wildflowers .blue {
+    fill: var(--flower-blue, #8FB5DC);
+    transition: fill 0.6s linear;
+  }
+
+  /* Carousel mode: hide the meadow + horizon (carousel has its own scene per card) */
+  body.carousel-mode .horizon,
+  body.carousel-mode .meadow { opacity: 0; pointer-events: none; }
+
+  /* Dark mode: dim horizon, deeper meadow tones */
+  body[data-theme="dark"] .horizon {
+    opacity: 0.6;
+    --horizon-far: rgba(60, 75, 100, 0.55);
+    --horizon-near: rgba(40, 55, 80, 0.75);
+  }
+  body[data-theme="dark"] .meadow {
+    --grass-back: #1F3528;
+    --grass-front: #2C4A38;
+    --grass-blade: rgba(150, 200, 165, 0.35);
+    --daisy-petal: rgba(220, 230, 240, 0.7);
+    --daisy-center: rgba(220, 195, 130, 0.85);
+    --flower-yellow: rgba(220, 190, 130, 0.7);
+    --flower-pink: rgba(180, 140, 165, 0.7);
+    --flower-blue: rgba(140, 165, 195, 0.7);
+  }
+
+  /* === NAV === */
+  /* === NAV — matched to Natalie's spec ===
+     Her tokens (from nataliealmosa.ca CSS):
+       brand: serif display ("Otto"); we use Newsreader as the free analog
+       links: Inter, 14px / 400, letter-spacing -0.01em, gray secondary color
+       hover: opacity 0.6, no color change
+       pill: light pink/lavender background, pink-secondary text     */
+  /* Nav uses Natalie's exact pattern: two independently fixed-positioned
+     clusters (left + right) anchored to the viewport corners, not a flex
+     container with padding. Right cluster sits 6px higher to vertically
+     align the taller pills with the brand text. */
+  nav {
+    position: relative;
+    z-index: 400;
+    background: transparent;
+    border-bottom: none;
+  }
+  /* Subtle blur backdrop appears as you scroll under the nav */
+  body.carousel-mode nav {
+    background: rgba(255, 255, 255, 0);
+    border-bottom: none;
+  }
+  nav .nav-left {
+    position: fixed; left: 72px; top: 24px;
+    z-index: 400;
+    display: flex; align-items: center; gap: 24px;
+  }
+  nav .brand {
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 500;
+    color: #1A1A1A;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    line-height: 16px;
+    margin: 0;
+  }
+  nav .nav-links { display: flex; align-items: center; gap: 8px; }
+  /* Show one set of links at a time — scroll links by default, carousel links when overlay is open */
+  nav .nav-links.nav-carousel { display: none; }
+  body.carousel-mode nav .nav-links.nav-scroll { display: none; }
+  body.carousel-mode nav .nav-links.nav-carousel { display: flex; }
+  nav .nav-links a {
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: -0.01em;
+    color: rgba(0, 0, 0, 0.45);
+    text-decoration: none;
+    padding: 0;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+  nav .nav-links a:hover { opacity: 0.6; color: rgba(0, 0, 0, 0.55); }
+  /* "Active" link — the first one (about) is dark, like Natalie's default */
+  nav .nav-links a.is-active { color: #1A1A1A; font-weight: 500; }
+  nav .nav-right {
+    position: fixed; right: 72px; top: 18px;
+    z-index: 400;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* Scroll-mode pill — Natalie's pattern: grey by default, lights up
+     into the mode color only when actively selected. */
+  nav .scroll-pill {
+    font-family: var(--body);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    padding: 8px 14px 8px 10px;
+    border-radius: 100px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  }
+  nav .scroll-pill:hover { opacity: 0.85; }
+  nav .scroll-pill svg { width: 16px; height: 16px; display: block; }
+  nav .scroll-pill svg .sp-row { stroke: rgba(0, 0, 0, 0.5); }
+  /* Active state — Scroll mode is the default; light up to blue when active */
+  body:not(.carousel-mode) nav .scroll-pill {
+    background: rgba(99, 139, 191, 0.20);
+    color: #2E5A91;
+  }
+  body:not(.carousel-mode) nav .scroll-pill svg .sp-row { stroke: #2E5A91; }
+  /* Symmetric pattern: only the ACTIVE-mode pill shows its label.
+     The inactive pill collapses to an icon-only round chip but stays
+     clickable, so one tap switches modes. */
+  body.carousel-mode nav .scroll-pill span { display: none; }
+  body.carousel-mode nav .scroll-pill {
+    padding: 6px;
+    background: #E5EEF5;
+    color: #5B7186;
+  }
+  body.carousel-mode nav .scroll-pill svg .sp-row { stroke: #7C9AB2; }
+  body[data-theme="dark"].carousel-mode nav .scroll-pill {
+    background: rgba(124, 154, 178, 0.18);
+  }
+  body[data-theme="dark"].carousel-mode nav .scroll-pill svg .sp-row { stroke: rgba(255, 255, 255, 0.6); }
+
+  /* In scroll mode the Carousel pill is icon-only and stays grey (matches
+     Natalie's pattern — the inactive pill is a neutral chip). */
+  body:not(.carousel-mode) nav .carousel-pill span { display: none; }
+  body:not(.carousel-mode) nav .carousel-pill {
+    padding: 6px;
+  }
+
+  /* Tiny decorative 4-petal cluster between mode icons */
+  nav .mode-divider {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    margin: 0 -2px;
+  }
+  nav .mode-divider svg { width: 14px; height: 14px; }
+  nav .mode-divider svg circle { fill: rgba(0, 0, 0, 0.22); }
+
+  /* Carousel-mode pill — Natalie's exact pattern: grey by default,
+     lights up to pink only when carousel mode is active. */
+  nav .carousel-pill {
+    font-family: var(--body);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    color: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    padding: 8px 14px 8px 10px;
+    border-radius: 100px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  }
+  nav .carousel-pill:hover { opacity: 0.85; }
+  /* Suppress the bright blue focus outline after a mouse click — keep
+     it only for keyboard navigation (a11y best practice). */
+  nav .scroll-pill:focus,
+  nav .carousel-pill:focus,
+  nav .theme-toggle:focus { outline: none; }
+  nav .scroll-pill:focus-visible,
+  nav .carousel-pill:focus-visible,
+  nav .theme-toggle:focus-visible {
+    outline: 2px solid rgba(99, 139, 191, 0.6);
+    outline-offset: 2px;
+  }
+  nav .carousel-pill svg { width: 16px; height: 16px; display: block; }
+  nav .carousel-pill svg .cp-bar { fill: rgba(0, 0, 0, 0.5); }
+  /* When carousel is OPEN, light up to pink */
+  body.carousel-mode nav .carousel-pill {
+    background: rgba(252, 137, 240, 0.20);
+    color: #C44BA8;
+  }
+  body.carousel-mode nav .carousel-pill svg .cp-bar { fill: #C44BA8; }
+
+  /* Light / Dark mode toggle — Natalie's exact pattern: translucent
+     mode-tinted circle, no border. Yellow tint in light mode, blue tint
+     in dark mode. */
+  nav .theme-toggle {
+    width: 38px; height: 38px;
+    background: rgba(255, 193, 7, 0.32);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    margin-left: 4px;
+    transition: background 0.2s ease, transform 0.2s ease, opacity 0.15s ease;
+  }
+  nav .theme-toggle:hover { background: rgba(255, 193, 7, 0.45); }
+  nav .theme-toggle svg { width: 22px; height: 22px; display: block; }
+  nav .theme-toggle .icon-moon { display: none; }
+  nav .theme-toggle .sun-core { fill: #F59E0B; opacity: 1; }
+  nav .theme-toggle .sun-rays line { stroke: #F59E0B; opacity: 1; stroke-width: 2.8; }
+  /* Dark mode — translucent blue tint with a pale-blue moon glyph. */
+  body[data-theme="dark"] nav .theme-toggle {
+    background: rgba(139, 184, 232, 0.32);
+  }
+  body[data-theme="dark"] nav .theme-toggle:hover {
+    background: rgba(139, 184, 232, 0.45);
+  }
+  body[data-theme="dark"] nav .theme-toggle .icon-sun { display: none; }
+  body[data-theme="dark"] nav .theme-toggle .icon-moon { display: block; }
+  body[data-theme="dark"] nav .theme-toggle .icon-moon path {
+    fill: #BFD9F5;
+  }
+
+  /* ====================================================================
+     DARK MODE — palette swap. Sky/clouds/sun fade out; ink flips to pale.
+     Carousel keeps its sunrise→sunset interior, but the page background
+     becomes a deep navy with very subtle clouds. */
+  body[data-theme="dark"] {
+    background: #0E1422;
+    color: #E8EBF1;
+  }
+  body[data-theme="dark"] .sky {
+    background: linear-gradient(180deg, #0E1422 0%, #131A2C 50%, #18213A 100%);
+  }
+  body[data-theme="dark"] .sun {
+    background: radial-gradient(circle, rgba(255, 245, 220, 0.35) 0%, rgba(255, 220, 180, 0.10) 30%, transparent 65%);
+    opacity: 0.5;
+  }
+  body[data-theme="dark"] .cloud svg path.fill { fill: rgba(255, 255, 255, 0.06); }
+  body[data-theme="dark"] .cloud svg path.silver { stroke: rgba(255, 255, 255, 0.10); }
+  body[data-theme="dark"] .stars { opacity: 0.8; }
+  body[data-theme="dark"] nav { background: rgba(14, 20, 34, 0); }
+  body[data-theme="dark"] nav .brand { color: #F2F4F9; }
+  body[data-theme="dark"] nav .nav-links a { color: rgba(255, 255, 255, 0.45); }
+  body[data-theme="dark"] nav .nav-links a.is-active { color: #FFFFFF; }
+  /* Dark-mode TOOLKIT card + skill chips — flip the hardcoded white backgrounds */
+  body[data-theme="dark"] .digital-stack {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.30);
+  }
+  body[data-theme="dark"] .skill-chip {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.78);
+  }
+  body[data-theme="dark"] .skill-chip:hover {
+    background: rgba(255, 255, 255, 0.92);
+    color: #1A1A1A;
+    border-color: rgba(255, 255, 255, 0.92);
+  }
+  body[data-theme="dark"] .stack-row {
+    border-top-color: rgba(255, 255, 255, 0.10);
+  }
+  body[data-theme="dark"] .stack-label {
+    color: rgba(255, 255, 255, 0.45);
+  }
+  /* Dark-mode lab-notebook open pill */
+  body[data-theme="dark"] details.wetlab-details > summary {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.88);
+  }
+  body[data-theme="dark"] details.wetlab-details > summary:hover,
+  body[data-theme="dark"] details.wetlab-details[open] > summary {
+    background: rgba(255, 255, 255, 0.10);
+  }
+  body[data-theme="dark"] details.wetlab-details > summary .summary-chevron {
+    color: rgba(255, 255, 255, 0.55);
+  }
+  /* === DARK-MODE NAV PILLS — single consolidated set ===
+     Default: clearly visible translucent white chip.
+     Active mode: light up to mode color (blue scroll / pink carousel). */
+  body[data-theme="dark"] nav .scroll-pill,
+  body[data-theme="dark"] nav .carousel-pill {
+    background: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.75);
+  }
+  body[data-theme="dark"] nav .scroll-pill svg .sp-row { stroke: rgba(255, 255, 255, 0.75); }
+  body[data-theme="dark"] nav .carousel-pill svg .cp-bar { fill: rgba(255, 255, 255, 0.75); }
+  /* Active scroll pill (scroll mode = default) */
+  body[data-theme="dark"]:not(.carousel-mode) nav .scroll-pill {
+    background: rgba(99, 139, 191, 0.45);
+    color: #DCEBFB;
+  }
+  body[data-theme="dark"]:not(.carousel-mode) nav .scroll-pill svg .sp-row { stroke: #DCEBFB; }
+  /* Active carousel pill (carousel mode) */
+  body[data-theme="dark"].carousel-mode nav .carousel-pill {
+    background: rgba(252, 137, 240, 0.32);
+    color: #F8C5EE;
+  }
+  body[data-theme="dark"].carousel-mode nav .carousel-pill svg .cp-bar { fill: #F8C5EE; }
+  body[data-theme="dark"] {
+    --ink: #E8EBF1;
+    --ink-soft: #9AA5B8;
+    --rule: rgba(255, 255, 255, 0.10);
+    --paper: #161C2E;
+  }
+  body[data-theme="dark"] .name { color: #F2F4F9; }
+  body[data-theme="dark"] h2, body[data-theme="dark"] h3,
+  body[data-theme="dark"] .exp-title, body[data-theme="dark"] .about-headline,
+  body[data-theme="dark"] .subsection-title { color: #F2F4F9; }
+  body[data-theme="dark"] .about-text, body[data-theme="dark"] .about-substory p,
+  body[data-theme="dark"] .exp-detail { color: #C5CCDB; }
+  body[data-theme="dark"] .exp-role,
+  body[data-theme="dark"] .section-meta { color: #8E99AD; }
+  body[data-theme="dark"] .project,
+  body[data-theme="dark"] .project-preview { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.10); }
+  body[data-theme="dark"] footer { color: #8E99AD; }
+  body[data-theme="dark"] .exp-item { border-color: rgba(255, 255, 255, 0.10); }
+  /* The carousel overlay keeps its own palette (sunrise→sunset) regardless. */
+
+  /* === LAYOUT === */
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 10; }
+  section { padding: 130px 0; position: relative; }
+
+  /* === HERO === */
+  .hero { min-height: 100vh; display: flex; align-items: center; padding-top: 120px; padding-bottom: 60px; }
+  h1.name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(64px, 9vw, 140px);
+    line-height: 0.95;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+  }
+
+  /* === SECTION HEADS === */
+  .section-meta {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 32px;
+    font-family: var(--mono);
+    font-size: 11px; color: var(--ink-soft);
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .section-meta .num { color: var(--accent); }
+  .section-meta .line { flex: 1; height: 1px; background: var(--rule); }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(30px, 3.6vw, 46px);
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 36px;
+    letter-spacing: -0.03em;
+  }
+  h2 .accent { color: var(--accent); }
+
+  .subsection-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(18px, 1.9vw, 24px);
+    line-height: 1.15;
+    color: var(--ink);
+    margin: 64px 0 22px;
+    letter-spacing: -0.022em;
+  }
+  .subsection-title .accent { color: var(--accent); }
+
+  /* === ABOUT === */
+  .about-headline {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(22px, 2.4vw, 32px);
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.028em;
+    margin-bottom: 20px;
+    max-width: 720px;
+  }
+  .about-headline .accent { color: var(--accent); }
+
+  .about-text {
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 680px;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .about-text p { margin-bottom: 14px; }
+  .about-text p:last-child { margin-bottom: 0; }
+  .about-text strong { font-weight: 600; }
+
+  .about-substory h3 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(16px, 1.7vw, 20px);
+    line-height: 1.15;
+    color: var(--ink);
+    letter-spacing: -0.018em;
+    margin: 30px 0 8px;
+  }
+  .about-substory p {
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 680px;
+    margin: 0 0 10px;
+  }
+  .about-substory p:last-child { margin-bottom: 0; }
+
+  /* === EXPERIENCE === */
+  .exp-list { border-top: 1px solid var(--rule); }
+  .exp-item {
+    display: grid;
+    grid-template-columns: 130px 1fr 110px;
+    gap: 32px;
+    padding: 30px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: baseline;
+    cursor: pointer;
+    transition: padding-left 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    text-decoration: none; color: inherit;
+  }
+  .exp-item:hover { padding-left: 14px; }
+  .exp-year { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); letter-spacing: 0.02em; padding-top: 6px; }
+  .exp-body { min-width: 0; }
+  .exp-title {
+    font-family: var(--display);
+    font-size: 26px; font-weight: 500; line-height: 1.2;
+    margin-bottom: 6px; color: var(--ink);
+    letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .exp-title .role { color: var(--accent); }
+  .exp-title .ext { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); opacity: 0; transition: opacity 0.3s; }
+  .exp-item:hover .exp-title .ext { opacity: 1; }
+  .exp-role { font-family: var(--body); font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
+  .exp-detail {
+    font-family: var(--body);
+    font-size: 14.5px; color: var(--ink); line-height: 1.65;
+    margin-top: 0; max-height: 0; opacity: 0; overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s, margin-top 0.4s;
+  }
+  .exp-item:hover .exp-detail { max-height: 240px; opacity: 1; margin-top: 14px; }
+  .exp-meta { justify-self: end; font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: 0.04em; padding-top: 8px; text-transform: uppercase; text-align: right; }
+
+  /* === WORK / PROJECTS — with website preview frames === */
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+
+  .project {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--rule);
+    border-radius: 28px;
+    padding: 0;
+    text-decoration: none; color: inherit;
+    display: flex; flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .project:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(26, 34, 51, 0.12);
+  }
+
+  .project-preview {
+    background: #F5F8FA;
+    aspect-ratio: 16 / 10;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--rule);
+  }
+  .project-preview .browser-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid var(--rule);
+    z-index: 2;
+  }
+  .browser-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .browser-bar .dot.r { background: #FF6058; }
+  .browser-bar .dot.y { background: #FFBD2E; }
+  .browser-bar .dot.g { background: #28C941; }
+  .browser-bar .url {
+    margin-left: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .project-preview .preview-content {
+    position: absolute; inset: 32px 0 0 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  .project-preview iframe {
+    width: 100%; height: 100%;
+    border: 0;
+    pointer-events: none;
+    transform: scale(0.65) translateY(-15%);
+    transform-origin: top left;
+    width: 153.85%;
+    height: 153.85%;
+  }
+  .project-preview-fallback {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    letter-spacing: -0.01em;
+  }
+  .project-preview .preview-image {
+    width: 100%; height: 100%; object-fit: cover; object-position: center top;
+  }
+
+  .project-body { padding: 24px 26px 28px; }
+
+  .project-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .project-name {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: -0.028em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .project-name .ext { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); font-weight: 400; opacity: 0; transition: opacity 0.3s, transform 0.3s; }
+  .project:hover .project-name .ext { opacity: 1; transform: translateX(4px); }
+  .project-desc { font-size: 14.5px; color: var(--ink); line-height: 1.6; margin-bottom: 14px; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 5px; }
+  .stack-chip {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink);
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+  }
+
+  /* === SKILLS — cloud-cards 2x2 grid === */
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+  .skill-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 32px;
+    padding: 36px 32px;
+    box-shadow: 0 12px 32px rgba(26, 34, 51, 0.06);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
+  }
+  .skill-card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(26, 34, 51, 0.1); }
+
+  .skill-icon {
+    font-family: var(--display);
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    text-transform: lowercase;
+  }
+  .skill-title {
+    font-family: var(--display);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-bottom: 20px;
+    letter-spacing: -0.03em;
+  }
+  .skill-list {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .skill-chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink);
+    padding: 5px 12px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+    transition: all 0.25s;
+  }
+  .skill-chip:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+    transform: translateY(-2px);
+  }
+
+  /* === DIGITAL STACK (replaces 4-card skills grid) === */
+  .digital-stack {
+    margin-top: 56px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 28px;
+    padding: 36px 40px;
+    box-shadow: 0 14px 36px rgba(26, 34, 51, 0.06);
+  }
+  .stack-header { margin-bottom: 22px; }
+  .stack-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .stack-title {
+    font-family: var(--display);
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .stack-grid {
+    display: flex; flex-direction: column;
+    gap: 0;
+  }
+  .stack-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 24px;
+    align-items: center;
+    padding: 18px 0;
+    border-top: 1px solid var(--rule);
+  }
+  .stack-row:first-child { border-top: none; padding-top: 6px; }
+  .stack-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .stack-chips {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+
+  /* === WET LAB collapsible === */
+  details.wetlab-details {
+    margin-top: 24px;
+  }
+  details.wetlab-details > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 24px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 100px;
+    transition: all 0.3s;
+    font-family: var(--body);
+    font-size: 14px;
+    color: var(--ink);
+    width: fit-content;
+  }
+  details.wetlab-details > summary::-webkit-details-marker { display: none; }
+  details.wetlab-details > summary:hover {
+    background: rgba(255, 255, 255, 0.85);
+    transform: translateY(-2px);
+  }
+  details.wetlab-details > summary .summary-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  details.wetlab-details > summary .summary-text {
+    font-weight: 500;
+  }
+  details.wetlab-details > summary .summary-chevron {
+    display: inline-block;
+    transition: transform 0.3s;
+    font-family: var(--mono);
+    color: var(--ink-soft);
+  }
+  details.wetlab-details[open] > summary .summary-chevron {
+    transform: rotate(180deg);
+  }
+  details.wetlab-details[open] > summary {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .wetlab-contents {
+    margin-top: 36px;
+    animation: fadeInDown 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === DISCIPLINES === */
+  .disciplines {
+    font-family: var(--display);
+    font-size: clamp(28px, 3.6vw, 46px);
+    line-height: 1.4;
+    color: var(--ink);
+    max-width: 940px;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+  }
+  .disciplines span { display: inline-block; transition: color 0.3s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); cursor: default; }
+  .disciplines span:hover { color: var(--accent); transform: translateY(-3px); }
+  .disciplines .sep { color: var(--ink-soft); margin: 0 4px; font-weight: 300; }
+
+  /* === CONTACT (Natalie-style: warm, conversational, dark) === */
+  #contact {
+    background: #1A2233;
+    margin-top: 80px;
+    position: relative;
+    z-index: 5;
+    padding: 130px 0 100px;
+  }
+  #contact .wrap { color: #F7F4F0; }
+
+  .contact-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.4vw, 44px);
+    line-height: 1.05;
+    color: #F7F4F0;
+    margin-bottom: 22px;
+    letter-spacing: -0.03em;
+    max-width: 720px;
+  }
+  .contact-title .accent { color: var(--accent); }
+
+  .contact-intro {
+    font-family: var(--body);
+    font-size: 15px;
+    color: rgba(247, 244, 240, 0.7);
+    line-height: 1.6;
+    max-width: 560px;
+    margin-bottom: 40px;
+  }
+
+  .contact-rows {
+    max-width: 600px;
+    border-top: 1px solid rgba(247, 244, 240, 0.15);
+    margin-bottom: 36px;
+  }
+  .contact-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(247, 244, 240, 0.15);
+    align-items: baseline;
+  }
+  .contact-row .label {
+    font-family: var(--body);
+    font-size: 14px;
+    color: rgba(247, 244, 240, 0.5);
+  }
+  .contact-row a {
+    font-family: var(--body);
+    font-size: 16px;
+    color: #F7F4F0;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .contact-row a:hover { color: var(--accent); }
+
+  .download-cv {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--body);
+    font-size: 15px;
+    color: #F7F4F0;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(247, 244, 240, 0.4);
+    padding-bottom: 2px;
+    margin-bottom: 80px;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .download-cv:hover { color: var(--accent); border-color: var(--accent); }
+
+  .yap-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(28px, 3.6vw, 44px);
+    line-height: 1.1;
+    color: #F7F4F0;
+    margin-bottom: 14px;
+    letter-spacing: -0.025em;
+  }
+  .yap-sub {
+    font-family: var(--body);
+    font-size: 15px;
+    color: rgba(247, 244, 240, 0.6);
+    margin-bottom: 32px;
+  }
+  .yap-list {
+    display: flex; flex-direction: column; gap: 14px;
+    max-width: 600px;
+  }
+  .yap-item {
+    background: rgba(247, 244, 240, 0.04);
+    border: 1px solid rgba(247, 244, 240, 0.1);
+    border-radius: 16px;
+    padding: 18px 22px;
+    transition: all 0.3s;
+  }
+  .yap-item:hover {
+    background: rgba(247, 244, 240, 0.08);
+    border-color: rgba(247, 244, 240, 0.2);
+  }
+  .yap-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 6px;
+  }
+  .yap-head .icon { font-size: 18px; }
+  .yap-head .name {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 500;
+    color: #F7F4F0;
+    letter-spacing: -0.015em;
+  }
+  .yap-desc {
+    font-family: var(--body);
+    font-size: 14px;
+    color: rgba(247, 244, 240, 0.55);
+    line-height: 1.55;
+    margin-left: 30px;
+  }
+
+  footer {
+    background: #1A2233;
+    color: rgba(247, 244, 240, 0.5);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 30px 40px 50px;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 5;
+  }
+
+  /* === CAROUSEL OVERLAY — sunrise→sunset sky that shifts as you scroll === */
+  body.carousel-mode { overflow: hidden; }
+  .carousel-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: var(--c-bg, linear-gradient(180deg, #A8D5F0 0%, #C8E2F2 50%, #E8F2FA 100%));
+    transition: background 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    display: none;
+    align-items: center;
+    overflow-x: auto; overflow-y: hidden;
+    /* `proximity` lets you free-scroll with natural trackpad momentum and
+       only nudges to a card when you're close. `mandatory` was forcing a
+       snap on every micro-movement, which felt like jitter on trackpad. */
+    scroll-snap-type: x proximity;
+    scroll-behavior: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none; -ms-overflow-style: none;
+    opacity: 0;
+  }
+  .carousel-overlay::-webkit-scrollbar { display: none; }
+  .carousel-overlay.open { display: flex; opacity: 1; }
+  /* === Carousel sun (soft fixed orb) — same vibe as the scroll page's sun.
+     No `filter: blur` (expensive on a 640px element during scroll) — the
+     wide radial gradient stops already feather the edge. */
+  .carousel-sun {
+    position: fixed; top: var(--c-sun-top, 60%); left: 50%;
+    transform: translate(-50%, -50%) translateZ(0);
+    width: 640px; height: 640px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--c-sun-core, rgba(255, 248, 225, 0.85)) 0%, var(--c-sun-glow, rgba(255, 215, 175, 0.35)) 30%, transparent 65%);
+    z-index: 1;
+    pointer-events: none;
+    transition: top 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s linear;
+    opacity: 0;
+    will-change: transform;
+  }
+  .carousel-overlay.open ~ .carousel-sun,
+  .carousel-overlay.open .carousel-sun { opacity: 1; }
+
+  /* === Carousel drifting clouds — same SVG + drift animation as the page === */
+  .carousel-clouds {
+    position: fixed; inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .carousel-overlay.open .carousel-clouds { opacity: 1; }
+  .carousel-clouds .cl {
+    position: absolute;
+    transition: opacity 0.4s linear;
+    /* Promote to a GPU layer so the drift animation doesn't repaint
+       the sky gradient on every frame. */
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  /* Pause atmospheric animations during active horizontal scroll so the GPU
+     can focus on the snap motion. Resumes ~180ms after scroll stops. */
+  .carousel-overlay.is-scrolling .carousel-clouds .cl,
+  .carousel-overlay.is-scrolling .carousel-clouds,
+  .carousel-overlay.is-scrolling ~ .carousel-stars .cs {
+    animation-play-state: paused;
+  }
+  .carousel-clouds .cl svg { display: block; width: 100%; }
+  .carousel-clouds .cl svg path.fill { fill: var(--c-cloud, rgba(255, 255, 255, 0.96)); }
+  .carousel-clouds .cl svg path.silver {
+    fill: none;
+    stroke: var(--c-cloud-edge, #FFFFFF);
+    stroke-width: 2.5;
+    opacity: 0.9;
+  }
+  .carousel-clouds .cl1 { width: 380px; top: 9vh;  left: -420px; animation: drift 110s linear infinite;             opacity: 0.95; }
+  .carousel-clouds .cl2 { width: 280px; top: 26vh; left: -320px; animation: drift 85s  linear infinite -30s;        opacity: 0.85; }
+  .carousel-clouds .cl3 { width: 460px; top: 50vh; left: -500px; animation: drift 130s linear infinite -55s;        opacity: 0.8;  }
+  .carousel-clouds .cl4 { width: 340px; top: 74vh; left: -380px; animation: drift 95s  linear infinite -10s;        opacity: 0.9;  }
+  .carousel-clouds .cl5 { width: 400px; top: 88vh; left: -440px; animation: drift 105s linear infinite -45s;        opacity: 0.75; }
+  /* Dark mode: clouds fade to faint silhouettes, like the page's dark-mode sky */
+  body[data-theme="dark"] .carousel-clouds .cl svg path.fill { fill: rgba(255, 255, 255, 0.06); }
+  body[data-theme="dark"] .carousel-clouds .cl svg path.silver { stroke: rgba(255, 255, 255, 0.10); }
+  body[data-theme="dark"] .carousel-sun { opacity: 0; }
+
+  /* Tiny drifting stars in the navy overlay for atmosphere */
+  .carousel-stars {
+    position: fixed; inset: 0; z-index: 201;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  /* Stars only show in dark mode — light-mode carousel sky is sunrise→sunset */
+  body[data-theme="dark"] .carousel-overlay.open ~ .carousel-stars { opacity: 1; }
+  .carousel-stars .cs {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #FFF; border-radius: 50%;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
+    animation: twinkle 4s ease-in-out infinite;
+  }
+
+  .carousel-close {
+    position: fixed; top: 22px; right: 40px; z-index: 300;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #FFF;
+    width: 44px; height: 44px;
+    border-radius: 50%; cursor: pointer;
+    font-family: var(--mono); font-size: 18px;
+    display: none; align-items: center; justify-content: center;
+    transition: all 0.3s;
+  }
+  .carousel-close:hover { background: rgba(255, 255, 255, 0.2); transform: rotate(90deg); }
+  .carousel-close.show { display: flex; }
+  .carousel-hint {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%); z-index: 300;
+    color: rgba(255, 255, 255, 0.45);
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    display: none;
+  }
+  .carousel-hint.show { display: none; } /* Natalie has no persistent hint */
+  .carousel-track {
+    display: flex; padding: 96px 20px 32px; gap: 20px;
+    min-height: 100vh; align-items: center;
+    /* Stack the cards above the carousel-sun + carousel-clouds layers so
+       the sky/clouds drift BEHIND the cards, not on top. */
+    position: relative;
+    z-index: 5;
+  }
+
+  /* === Natalie-pattern v5: NO circles. Full-bleed painted backdrop
+     (saturated solid color + heavy turbulence texture), with the
+     project thumbnail floating centered on top. Matches her real
+     Notion Mail / Skiff / Arc carousel cards exactly. === */
+  .card-scene {
+    position: relative;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;          /* anchor screenshot to the bottom of the card */
+    justify-content: center;
+    padding: 0;
+  }
+  /* The painted backdrop. Each .scene-X sets --bg-top / --bg-bot for
+     a soft vertical fade (gives every card a "sky" quality, which is
+     what makes the sunrise→sunset progression read).
+     Layered: glow sun + 4 wandering cloud-blobs + horizon band + base sky. */
+  .card-scene-bg {
+    position: absolute; inset: 0;
+    z-index: 0;
+    background:
+      /* Soft "sun" glow — anchors the eye, gives the scene a light source */
+      radial-gradient(circle at var(--bg-sun-x, 78%) var(--bg-sun-y, 24%),
+        var(--bg-sun, rgba(255, 245, 220, 0.55)) 0%,
+        var(--bg-sun-soft, rgba(255, 220, 180, 0.18)) 18%,
+        transparent 42%),
+      /* Wandering warm cloud-blob highlights */
+      radial-gradient(130% 45% at 18% 18%, var(--bg-hi, rgba(255, 240, 220, 0.5)) 0%, transparent 62%),
+      radial-gradient(85% 32% at 70% 38%, var(--bg-hi, rgba(255, 240, 220, 0.38)) 0%, transparent 58%),
+      radial-gradient(65% 22% at 50% 6%, var(--bg-hi, rgba(255, 240, 220, 0.48)) 0%, transparent 58%),
+      radial-gradient(90% 28% at 30% 70%, var(--bg-hi, rgba(255, 240, 220, 0.30)) 0%, transparent 60%),
+      /* Subtle horizon band — soft brightening near 65% gives depth */
+      linear-gradient(180deg, transparent 50%, var(--bg-horizon, rgba(255, 250, 235, 0.18)) 65%, transparent 78%),
+      /* Base sky fade */
+      linear-gradient(180deg,
+        var(--bg-top, #F2C798) 0%,
+        var(--bg-mid, color-mix(in srgb, var(--bg-top), var(--bg-bot))) 55%,
+        var(--bg-bot, #D87A48) 100%);
+  }
+  /* Inset vignette — gently darkens the corners so the scene reads as
+     a window onto the sky, not a flat tile. */
+  .card-scene-bg::after {
+    content: ""; position: absolute; inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(26, 34, 51, 0.18) 100%);
+    mix-blend-mode: multiply;
+  }
+  /* PAINTERLY CANVAS — fractal-noise turbulence baked as a data URI.
+     Layered over each card's gradient with multiply/overlay blend modes
+     to mimic oil paint on cracked canvas. Heavier than v3 to match
+     Natalie's clearly-brushed Notion Mail card. */
+  .card-scene::before {
+    content: ""; position: absolute; inset: 0; z-index: 1;
+    pointer-events: none;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0 0.05  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 320px 320px;
+    mix-blend-mode: multiply;
+    opacity: 0.45;
+  }
+  /* Brushy streak texture (longer-frequency noise) on top, lighter blend */
+  .card-scene::after {
+    content: ""; position: absolute; inset: 0; z-index: 1;
+    pointer-events: none;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'><filter id='b'><feTurbulence type='turbulence' baseFrequency='0.008 0.05' numOctaves='4' seed='4'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.97  0 0 0 0 0.93  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23b)'/></svg>");
+    background-size: 800px 800px;
+    mix-blend-mode: soft-light;
+    opacity: 0.55;
+  }
+
+  /* Toast pill — Natalie shows it only on hover; default hidden.
+     Whole card is the click target via the anchor wrapping. The pill
+     is the visible label that appears as you move over the card. */
+  .card-toast {
+    position: absolute;
+    top: 26px; left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    z-index: 5;
+    display: flex; align-items: center; gap: 11px;
+    background: #FFFFFF;
+    padding: 7px 18px 7px 7px;
+    border-radius: 100px;
+    box-shadow:
+      0 6px 20px rgba(26, 34, 51, 0.12),
+      0 1px 3px rgba(26, 34, 51, 0.08);
+    text-decoration: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card:hover .card-toast {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .card-toast .toast-icon {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #FFF;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display);
+    font-size: 15px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .card-toast .toast-text {
+    display: flex; flex-direction: column;
+    line-height: 1.2;
+    padding-right: 4px;
+  }
+  .card-toast .toast-title {
+    font-family: var(--body);
+    font-size: 13px; font-weight: 600;
+    color: #1A2233;
+    letter-spacing: -0.003em;
+  }
+  .card-toast .toast-cta {
+    font-family: var(--body);
+    font-size: 12px; font-weight: 400;
+    color: #6B7585;
+    margin-top: 1px;
+  }
+  /* Invisible link layer covering the whole card so anywhere is clickable */
+  .card-link-overlay {
+    position: absolute; inset: 0; z-index: 3;
+    display: block;
+    text-decoration: none;
+  }
+
+  /* Hero thumbnail — Natalie's Notion-Mail pattern: a painted-sky band at
+     the TOP of the card, the screenshot anchored to the bottom and
+     bleeding slightly off the card's bottom edge (clipped by the card's
+     overflow:hidden + rounded corners). The card itself stays fully
+     visible inside the viewport. */
+  .card-hero {
+    position: relative;
+    z-index: 2;
+    width: 94%;
+    height: 80%;
+    margin: 0;
+    align-self: center;
+    margin-bottom: -3%;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow:
+      0 4px 4px 0 hsla(0, 0%, 78%, 0.16),
+      0 40px 90px rgba(26, 34, 51, 0.30),
+      0 14px 28px rgba(26, 34, 51, 0.14);
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    background: #FFF;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card:hover .card-hero { transform: translateY(-4px); }
+
+  /* ====================================================================
+     ROLE CARD — replaces a marketing-site screenshot with a clear
+     "I worked here" panel. Sits in the card-hero slot, so it inherits
+     the same float-on-painted-backdrop styling as a real thumbnail. */
+  .role-card {
+    padding: 44px 48px;
+    display: flex; flex-direction: column;
+    gap: 18px;
+    background: #FFFFFF;
+    color: #1A1A1A;
+    text-align: left;
+  }
+  .role-card-eyebrow {
+    font-family: var(--body);
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.55);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .role-card-mark {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    color: #FFF;
+    background: #E48246; /* OMEGA default */
+    letter-spacing: 0;
+  }
+  .role-card-mark.sanofi { background: #B83340; }
+  .role-card-headline {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.012em;
+    color: #1A1A1A;
+    margin: 0;
+  }
+  .role-card-sub {
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.55;
+    color: rgba(0, 0, 0, 0.65);
+    max-width: 720px;
+    letter-spacing: -0.005em;
+  }
+  .role-card-rule {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.10);
+    margin: 4px 0 4px;
+  }
+  .role-card-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .role-card-label {
+    font-family: var(--body);
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.45);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .role-card-list {
+    font-family: var(--body);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: rgba(0, 0, 0, 0.82);
+    list-style: none;
+    padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .role-card-list li {
+    position: relative;
+    padding-left: 16px;
+  }
+  .role-card-list li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 9px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+  }
+  .role-card-chips {
+    display: flex; flex-wrap: wrap; gap: 6px 8px;
+  }
+  .role-card-chips span {
+    font-family: var(--body);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.72);
+    background: rgba(0, 0, 0, 0.05);
+    padding: 5px 11px;
+    border-radius: 100px;
+    letter-spacing: -0.003em;
+  }
+  /* When .card-hero contains a role card (no screenshot), don't bleed
+     it off the bottom — center it vertically in the card instead. */
+  .card-scene:has(.role-card) { align-items: center; }
+  .card-hero.role-card {
+    margin: auto;
+    margin-bottom: auto;
+    height: auto;
+    min-height: 0;
+    max-height: 84%;
+    overflow: auto;
+    scrollbar-width: none;
+  }
+  .card-hero.role-card::-webkit-scrollbar { display: none; }
+  .card-hero img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    display: block;
+  }
+  /* Stacked-windows variant (depth, like Natalie's Skiff card) */
+  .card-stack {
+    position: relative;
+    z-index: 2;
+    width: 88%;
+    height: 76%;
+    margin-bottom: -3%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card:hover .card-stack { transform: translateY(-4px); }
+  .card-stack .stack-layer {
+    position: absolute;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.15);
+    background: #FFF;
+  }
+  .card-stack .stack-layer img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    display: block;
+  }
+  .card-stack .layer-back {
+    left: 4%; top: 8%;
+    width: 80%; height: 78%;
+    opacity: 0.92;
+    transform: rotate(-1.2deg);
+  }
+  .card-stack .layer-front {
+    right: 4%; bottom: 0%;
+    width: 84%; height: 88%;
+  }
+
+  /* Per-scene painted backdrop colors — left-to-right = sunrise → sunset.
+     Each card is a vertical fade from --bg-top (sky/highlight) to
+     --bg-bot (deeper body), painted-over by the turbulence texture. */
+
+  /* Per-scene tokens: --bg-top/--bg-bot drive the sky fade;
+     --bg-hi tints the cloud blobs; --bg-sun-x/y positions the soft sun;
+     --bg-sun + --bg-sun-soft set its core/glow color;
+     --bg-horizon paints the warm band; --bg-mid tightens the gradient. */
+
+  /* sunrise — soft peach, sun low-right rising (OMEGA) */
+  .scene-omega {
+    --bg-top: #FAD2AC; --bg-mid: #F4AB7C; --bg-bot: #E89270;
+    --bg-hi: rgba(255, 248, 230, 0.50);
+    --bg-sun-x: 78%; --bg-sun-y: 58%;
+    --bg-sun: rgba(255, 240, 200, 0.70);
+    --bg-sun-soft: rgba(255, 200, 150, 0.25);
+    --bg-horizon: rgba(255, 230, 195, 0.22);
+  }
+  /* warm coral morning (Sanofi) — softer than dark red */
+  .scene-sanofi {
+    --bg-top: #F2A8B0; --bg-mid: #E48490; --bg-bot: #CC6373;
+    --bg-hi: rgba(255, 220, 200, 0.45);
+    --bg-sun-x: 70%; --bg-sun-y: 32%;
+    --bg-sun: rgba(255, 215, 200, 0.60);
+    --bg-sun-soft: rgba(255, 170, 160, 0.22);
+    --bg-horizon: rgba(255, 200, 180, 0.20);
+  }
+  /* rose dawn (WOMBO) — pastel, less saturated */
+  .scene-wombo {
+    --bg-top: #F8C2D3; --bg-mid: #E89BB8; --bg-bot: #D078A0;
+    --bg-hi: rgba(255, 240, 230, 0.50);
+    --bg-sun-x: 32%; --bg-sun-y: 28%;
+    --bg-sun: rgba(255, 235, 225, 0.62);
+    --bg-sun-soft: rgba(245, 180, 195, 0.22);
+    --bg-horizon: rgba(255, 220, 215, 0.20);
+  }
+  /* midday clear-sky blue (BioMotion) — brighter, less heavy bottom */
+  .scene-biomotion {
+    --bg-top: #B5D0E5; --bg-mid: #8FB5D2; --bg-bot: #6E97BD;
+    --bg-hi: rgba(255, 240, 210, 0.45);
+    --bg-sun-x: 22%; --bg-sun-y: 18%;
+    --bg-sun: rgba(255, 250, 220, 0.60);
+    --bg-sun-soft: rgba(255, 230, 180, 0.22);
+    --bg-horizon: rgba(255, 235, 205, 0.18);
+  }
+  /* afternoon lavender (SARIT) — softer dusty purple */
+  .scene-sarit {
+    --bg-top: #C7B7DC; --bg-mid: #A595C5; --bg-bot: #8775AE;
+    --bg-hi: rgba(255, 230, 215, 0.45);
+    --bg-sun-x: 82%; --bg-sun-y: 70%;
+    --bg-sun: rgba(255, 230, 200, 0.60);
+    --bg-sun-soft: rgba(220, 180, 200, 0.22);
+    --bg-horizon: rgba(255, 220, 200, 0.20);
+  }
+  /* sunset gradient (Portfolio) — golden hour, softer pink */
+  .scene-portfolio {
+    --bg-top: #FAD0AA; --bg-mid: #EFA5B2; --bg-bot: #DA7F9A;
+    --bg-hi: rgba(255, 245, 220, 0.50);
+    --bg-sun-x: 50%; --bg-sun-y: 78%;
+    --bg-sun: rgba(255, 215, 180, 0.65);
+    --bg-sun-soft: rgba(255, 165, 145, 0.25);
+    --bg-horizon: rgba(255, 220, 195, 0.25);
+  }
+  /* twilight (Avatar) — softer navy with violet undertones */
+  .scene-avatar {
+    --bg-top: #4A3D72; --bg-mid: #322558; --bg-bot: #1C1338;
+    --bg-hi: rgba(200, 160, 220, 0.22);
+    --bg-sun-x: 80%; --bg-sun-y: 22%;
+    --bg-sun: rgba(220, 195, 255, 0.32);
+    --bg-sun-soft: rgba(140, 120, 200, 0.14);
+    --bg-horizon: rgba(120, 90, 180, 0.12);
+  }
+
+  /* Twilight scene toast inverts */
+  .card-twilight-scene .card-toast {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .card-twilight-scene .card-toast .toast-title { color: #F7F4F0; }
+  .card-twilight-scene .card-toast .toast-cta { color: rgba(247, 244, 240, 0.6); }
+
+  /* Toast icon brand colors per scene */
+  .scene-omega   .toast-icon { background: #E89478; }
+  .scene-sanofi  .toast-icon { background: #B83340; }
+  .scene-biomotion .toast-icon { background: #6A98C0; }
+  .scene-sarit   .toast-icon { background: #6B5A8C; }
+  .scene-wombo   .toast-icon { background: #C87A92; }
+  .scene-avatar  .toast-icon { background: #C95F7E; }
+  .scene-portfolio .toast-icon { background: linear-gradient(135deg, #A8D5F0, #C95F7E); }
+
+  /* Wet-lab card uses 4-tile mosaic in a frame instead of a single screenshot */
+  .card-mosaic-frame {
+    position: relative; z-index: 2;
+    width: 78%;
+    aspect-ratio: 1 / 1;
+    max-height: 60%;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(26, 34, 51, 0.28);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    background: #FFF;
+    padding: 4px;
+    transform: translateY(20px);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card:hover .card-mosaic-frame { transform: translateY(8px); }
+  .card-mosaic-frame > * {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: rgba(0,0,0,0.04);
+  }
+  .card-mosaic-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card-mosaic-frame .mini-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 14px; text-align: center;
+  }
+  .card-mosaic-frame .mini-text .big {
+    font-family: var(--display);
+    font-size: 18px; font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1;
+  }
+  .card-mosaic-frame .mini-text .small {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.65;
+    margin-top: 5px;
+  }
+
+  /* Contact-style card variant (twilight) keeps text body */
+
+  /* === Carousel cards: VISIBLE card sizes match Natalie's screenshots.
+     Her DOM section is 520×100vh, but the visible rounded card sits
+     INSIDE that section with padding. We just bake the padding into
+     the track so the card looks the way hers does on screen. */
+  .card {
+    flex: 0 0 500px;
+    /* Cards sit fully visible — top + bottom edges with rounded corners,
+       clear space below before the viewport edge (Natalie's pattern).
+       Vertical math: 88px nav gap + 40px bottom = 128px reserved. */
+    height: min(940px, calc(100vh - 128px));
+    min-height: 580px;
+    /* Contain repaints to the card box + promote to GPU layer — keeps
+       scrolling smooth when many cards are visible. */
+    contain: layout paint;
+    transform: translateZ(0);
+    will-change: transform;
+    border-radius: 56px;
+    padding: 0;
+    display: flex; flex-direction: column;
+    scroll-snap-align: center;
+    overflow: hidden;
+    box-shadow:
+      0 4px 4px 0 hsla(0, 0%, 78%, 0.16),
+      0 24px 60px rgba(26, 34, 51, 0.18),
+      0 8px 20px rgba(26, 34, 51, 0.08);
+    border: 0.5px solid rgba(0, 0, 0, 0.08);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    text-decoration: none;
+    color: #000;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-4px) scale(1.005); }
+  /* Wide showcase cards (her Notion Mail / Skiff / Arc pattern) —
+     20px horizontal gutter on each side of the viewport, matching her
+     `width: calc(100% - 40px)` value. Height inherits from .card. */
+  .card-wide { flex: 0 0 calc(100vw - 40px); }
+  .card-portrait { flex: 0 0 580px; }
+
+  /* Text-dense card body — matches Natalie's about overlay padding */
+  .card-body {
+    padding: 48px 38px 44px;
+    display: flex; flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    flex: 1;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .card-body::-webkit-scrollbar { display: none; }
+  /* Text cards (about, contact) get a softer, more rounded corner like hers */
+  .card-mustard, .card-twilight { border-radius: 56px; }
+
+  /* === GLASS CARDS — translucent panels (NO backdrop-filter; that's what
+     was causing the carousel scroll jank). The sky still shows through via
+     alpha, but the GPU doesn't have to re-blur it every frame. */
+  .card {
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.48) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow:
+      0 6px 18px rgba(26, 34, 51, 0.10),
+      0 18px 42px rgba(26, 34, 51, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+  }
+  /* Strip the painted scene backdrop — glass should show the sky underneath */
+  .card-scene-bg { display: none; }
+  .card-scene::before,
+  .card-scene::after { display: none; }
+  /* Text on glass: dark by default, light in dark mode */
+  .card-mustard, .card-twilight { color: #1A1A1A; }
+  .card-mustard .card-headline,
+  .card-twilight .card-headline,
+  .card-mustard .card-section-title,
+  .card-twilight .card-section-title,
+  .card-mustard .card-exp-title,
+  .card-twilight .card-exp-title { color: #1A1A1A; }
+  .card-mustard .card-section-text,
+  .card-twilight .card-section-text { color: rgba(0, 0, 0, 0.72); }
+  .card-twilight .card-exp-row { color: rgba(0, 0, 0, 0.78); }
+  .card-twilight .card-exp-row .yrs { color: rgba(0, 0, 0, 0.5); }
+  .card-twilight .card-exp-row .role-line strong { color: #1A1A1A; }
+  .card-twilight .card-exp-row .role-line .sub { color: rgba(0, 0, 0, 0.6); }
+  /* Dark mode: flip text colors to light for readability on navy-tinted glass */
+  body[data-theme="dark"] .card,
+  body[data-theme="dark"] .card .card-headline,
+  body[data-theme="dark"] .card .card-section-title,
+  body[data-theme="dark"] .card .card-exp-title { color: #F7F4F0; }
+  body[data-theme="dark"] .card .card-section-text { color: rgba(247, 244, 240, 0.78); }
+  body[data-theme="dark"] .card .card-exp-row { color: rgba(247, 244, 240, 0.82); }
+  body[data-theme="dark"] .card .card-exp-row .yrs { color: rgba(247, 244, 240, 0.5); }
+  body[data-theme="dark"] .card .card-exp-row .role-line strong { color: #F7F4F0; }
+  body[data-theme="dark"] .card .card-exp-row .role-line .sub { color: rgba(247, 244, 240, 0.6); }
+  body[data-theme="dark"] .card {
+    background: linear-gradient(180deg,
+      rgba(20, 28, 48, 0.65) 0%,
+      rgba(14, 20, 34, 0.62) 100%) !important;
+    border-color: rgba(255, 255, 255, 0.20) !important;
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.30),
+      0 18px 42px rgba(0, 0, 0, 0.36),
+      inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  }
+
+  /* Full-bleed image variant — Natalie uses these between text cards */
+  .card-image {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+  .card-image-wrap {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+  .card-image-caption {
+    position: absolute;
+    left: 28px; right: 28px; bottom: 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 10px 16px;
+    border-radius: 100px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* === ABOUT CARD typography — matched to Natalie's about overlay ===
+     Headline: serif display, ~40px, regular weight, tight leading
+     Subheadings ("Internet kid" etc.): serif, ~28px, semibold
+     Body: Inter, ~16px, comfortable leading, dark gray
+     Experience rows: 2 cols (year | content), thin divider, content has
+       bold name + gray role on one line and a description below in gray
+  */
+  .card-headline {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.14;
+    letter-spacing: -0.012em;
+    color: #1A1A1A;
+    margin: 0 0 14px;
+  }
+
+  .card-section { display: flex; flex-direction: column; gap: 6px; margin-top: 22px; }
+  .card-section-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 1.18;
+    letter-spacing: -0.012em;
+    color: #1A1A1A;
+    margin: 0;
+  }
+  .card-section-text {
+    font-family: var(--body);
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: rgba(0, 0, 0, 0.72);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+  .card-section-text p { margin: 0 0 12px; }
+  .card-section-text p:last-child { margin-bottom: 0; }
+  .card-section-text a { color: #1A1A1A; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* "Experience" section heading sits above the row list */
+  .card-exp-title {
+    font-family: var(--body);
+    font-weight: 500;
+    font-size: 13px;
+    color: #1A1A1A;
+    margin: 0 0 6px;
+    letter-spacing: -0.005em;
+  }
+  .card-exp-list { display: flex; flex-direction: column; gap: 0; }
+  .card-exp-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 18px;
+    align-items: start;
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 12px 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+  .card-exp-row:first-child { border-top: none; padding-top: 10px; }
+  .card-exp-row .yrs {
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 12.5px;
+    letter-spacing: -0.005em;
+  }
+  .card-exp-row .role-line { display: flex; flex-direction: column; gap: 2px; }
+  .card-exp-row .role-line strong {
+    font-weight: 600;
+    color: #1A1A1A;
+    font-size: 13px;
+    letter-spacing: -0.005em;
+  }
+  .card-exp-row .role-line .role {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12.5px;
+    margin-left: 6px;
+  }
+  .card-exp-row .role-line .sub {
+    color: rgba(0, 0, 0, 0.6);
+    display: block;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+
+  /* Sunrise → sunset palette — SATURATED (Natalie-bold, not pastel) */
+  .card-peach     { background: #F5B894; }   /* sunrise */
+  .card-sunpink   { background: #F09BA8; }   /* soft rose dawn */
+  .card-lavender  { background: #B6A2D2; }   /* mauve twilight */
+  .card-skywash   { background: #A8C8E0; }   /* clear sky */
+  .card-rosegold  { background: #E89478; }   /* golden hour */
+  .card-twilight  { background: #2D2542; color: #F7F4F0; }
+  /* Natalie's About card uses mustard yellow */
+  .card-mustard   { background: #E8C751; }
+  /* Natalie's Contact card uses near-black, not deep purple */
+  .card-twilight  { background: #0A0A0A; color: #F3F3F3; }
+
+  /* ====================================================================
+     CONTACT CARD INTERNALS — matched to Natalie's contact overlay */
+  .contact-rows {
+    margin: 24px 0 32px;
+    display: flex; flex-direction: column;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+  }
+  .contact-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+  .contact-row:hover { opacity: 0.7; }
+  .contact-label {
+    font-family: var(--body);
+    font-size: 15px;
+    color: rgba(0, 0, 0, 0.55);
+    letter-spacing: -0.005em;
+  }
+  .contact-value {
+    font-family: var(--body);
+    font-size: 15px;
+    color: #1A1A1A;
+    letter-spacing: -0.005em;
+  }
+  body[data-theme="dark"] .contact-label { color: rgba(247, 244, 240, 0.55); }
+  body[data-theme="dark"] .contact-value { color: #F7F4F0; }
+  body[data-theme="dark"] .contact-cv     { color: #F7F4F0; }
+  .contact-cv {
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
+    color: #1A1A1A;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    letter-spacing: -0.005em;
+    transition: opacity 0.15s ease;
+    margin-bottom: 56px;
+  }
+  .contact-cv:hover { opacity: 0.7; }
+  .contact-cv .arrow {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .contact-yap-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.012em;
+    color: #FFFFFF;
+    margin: 0 0 8px;
+  }
+  .contact-yap-sub {
+    font-family: var(--body);
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0 20px;
+    letter-spacing: -0.005em;
+  }
+  .yap-list {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .yap-card {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+    padding: 18px 22px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    align-items: start;
+  }
+  .yap-icon {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 2px;
+  }
+  .yap-title {
+    font-family: var(--body);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+  .yap-desc {
+    font-family: var(--body);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: -0.003em;
+  }
+  /* Contact card uses serif headline like the about card */
+  .card-twilight .card-headline {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 1.14;
+    letter-spacing: -0.012em;
+    color: #FFFFFF;
+    margin: 0 0 12px;
+  }
+  .card-twilight .card-section-text {
+    font-family: var(--body);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 6px;
+    letter-spacing: -0.005em;
+  }
+
+  /* Image mosaic within a card */
+  .card-mosaic {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+  .card-mosaic.three { grid-template-columns: 1fr 1fr 1fr; }
+  .card-tile {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  .card-tile img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .card-tile-label {
+    position: absolute;
+    left: 8px; right: 8px; bottom: 8px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #FFF;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 4px 8px;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .card-tile-text {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 12px;
+    color: inherit;
+  }
+  .card-tile-text .big {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+  .card-tile-text .small {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  /* Compact stack chips for cards */
+  .card-mini-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .card-mini-chip {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    padding: 3px 9px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+    color: inherit;
+  }
+  .card-twilight .card-mini-chip { background: rgba(255, 255, 255, 0.14); }
+  .card-twilight .card-headline,
+  .card-twilight .card-section-title,
+  .card-twilight .card-exp-title { color: #F7F4F0; }
+  .card-twilight .card-section-text { color: rgba(247, 244, 240, 0.7); }
+  .card-twilight .card-exp-row { color: rgba(247, 244, 240, 0.8); }
+  .card-twilight .card-exp-row .yrs { color: rgba(247, 244, 240, 0.45); }
+  .card-twilight .card-exp-row .role-line strong { color: #F7F4F0; }
+  .card-twilight .card-exp-row .role-line .sub { color: rgba(247, 244, 240, 0.55); }
+
+  /* Contact links inside contact card */
+  .card-contact-link {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--display);
+    font-size: 22px; font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(247, 244, 240, 0.2);
+    letter-spacing: -0.01em;
+    transition: padding-left 0.3s;
+  }
+  .card-contact-link:hover { padding-left: 6px; }
+  .card-contact-link:last-child { border-bottom: none; }
+  .card-contact-link .arrow { font-family: var(--mono); font-size: 13px; opacity: 0.5; }
+
+  .card-contact-links { display: flex; flex-direction: column; }
+  .card-contact-links a {
+    color: inherit; text-decoration: none;
+    font-family: var(--display);
+    font-size: 22px; font-weight: 500;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+    display: flex; justify-content: space-between;
+    transition: padding-left 0.3s;
+  }
+  .card-contact-links a:hover { padding-left: 8px; }
+  .card-contact-links a:last-child { border-bottom: none; }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 0 24px; }
+    section { padding: 80px 0; }
+    nav { padding: 16px 24px; }
+    nav .nav-links { display: none; }
+    .exp-item { grid-template-columns: 1fr; gap: 4px; }
+    .exp-meta { justify-self: start; padding-top: 4px; }
+    .projects { grid-template-columns: 1fr; }
+    .skills { grid-template-columns: 1fr; }
+    .sun { width: 360px; height: 360px; }
+    .card { flex: 0 0 88vw; }
+    .contact-row { grid-template-columns: 90px 1fr; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="stars" id="stars"></div>
+
+<!-- Painted-grain overlay — subtle noise that makes the sky feel illustrated -->
+<div class="sky-grain" aria-hidden="true"></div>
+
+<!-- Shooting star — fires every 30-90s, leaves a fading trail + lingering twinkle -->
+<div class="shooting-stars" id="shootingStars" aria-hidden="true"></div>
+
+<!-- Pet duo — pixel-art mini girl + sunflower companion. -->
+<div class="pet-duo" id="petDuo" aria-hidden="true">
+  <div class="pet-shadow"></div>
+  <!-- Pixel-art Minecraft-style girl. Each <rect> is a "pixel" on a 16-wide grid. -->
+  <svg class="pet-girl" viewBox="0 0 16 22" shape-rendering="crispEdges" aria-hidden="true">
+    <!-- HAIR (back) -->
+    <rect x="3" y="0" width="10" height="1" fill="#3A2418"/>
+    <rect x="2" y="1" width="12" height="3" fill="#3A2418"/>
+    <rect x="2" y="4" width="2"  height="2" fill="#3A2418"/>
+    <rect x="12" y="4" width="2" height="2" fill="#3A2418"/>
+    <!-- FACE -->
+    <rect x="4" y="2" width="8" height="1" fill="#C4896A"/>
+    <rect x="4" y="3" width="8" height="3" fill="#D49874"/>
+    <rect x="4" y="6" width="8" height="1" fill="#D49874"/>
+    <!-- HAIR BANGS -->
+    <rect x="4" y="2" width="2" height="1" fill="#3A2418"/>
+    <rect x="6" y="2" width="2" height="1" fill="#3A2418"/>
+    <rect x="9" y="2" width="3" height="1" fill="#3A2418"/>
+    <!-- HAIR SIDE TUFT (pink bow accent like the reference) -->
+    <rect x="12" y="3" width="1" height="2" fill="#F4A6C7"/>
+    <!-- EYES — big chibi -->
+    <rect x="5" y="4" width="2" height="2" fill="#1A0F08"/>
+    <rect x="9" y="4" width="2" height="2" fill="#1A0F08"/>
+    <rect x="5" y="4" width="1" height="1" fill="#FFFFFF"/>
+    <rect x="9" y="4" width="1" height="1" fill="#FFFFFF"/>
+    <!-- CHEEKS + MOUTH -->
+    <rect x="4" y="5" width="1" height="1" fill="#F4A6B0"/>
+    <rect x="11" y="5" width="1" height="1" fill="#F4A6B0"/>
+    <rect x="7" y="6" width="2" height="1" fill="#B0533F"/>
+    <!-- NECK -->
+    <rect x="6" y="7" width="4" height="1" fill="#C4896A"/>
+    <!-- SHIRT (white with pink trim) -->
+    <rect x="4" y="8" width="8" height="1" fill="#F4A6C7"/>
+    <rect x="4" y="9" width="8" height="3" fill="#FFFFFF"/>
+    <rect x="7" y="9" width="2" height="3" fill="#F4A6C7"/>
+    <!-- ARMS -->
+    <rect x="3" y="9" width="1" height="3" fill="#D49874"/>
+    <rect x="12" y="9" width="1" height="3" fill="#D49874"/>
+    <!-- SHORTS (lavender) -->
+    <rect x="5" y="12" width="6" height="2" fill="#A89BD8"/>
+    <rect x="5" y="14" width="2" height="3" fill="#A89BD8"/>
+    <rect x="9" y="14" width="2" height="3" fill="#A89BD8"/>
+    <!-- LEGS -->
+    <rect x="5" y="17" width="2" height="2" fill="#D49874"/>
+    <rect x="9" y="17" width="2" height="2" fill="#D49874"/>
+    <!-- BOOTS (pink) -->
+    <rect x="5" y="19" width="2" height="2" fill="#E88FB8"/>
+    <rect x="9" y="19" width="2" height="2" fill="#E88FB8"/>
+    <rect x="4" y="20" width="3" height="1" fill="#E88FB8"/>
+    <rect x="9" y="20" width="3" height="1" fill="#E88FB8"/>
+  </svg>
+
+  <!-- Pixel-art sunflower companion — sits next to the girl, head tracks the sun -->
+  <svg class="pet-flower" viewBox="0 0 16 24" shape-rendering="crispEdges" aria-hidden="true">
+    <!-- PETALS (back ring — darker) -->
+    <g class="pet-flower-head" id="petFlowerHead">
+      <rect x="2"  y="2" width="2" height="2" fill="#E8902A"/>
+      <rect x="6"  y="0" width="2" height="2" fill="#E8902A"/>
+      <rect x="10" y="2" width="2" height="2" fill="#E8902A"/>
+      <rect x="12" y="6" width="2" height="2" fill="#E8902A"/>
+      <rect x="10" y="10" width="2" height="2" fill="#E8902A"/>
+      <rect x="6"  y="12" width="2" height="2" fill="#E8902A"/>
+      <rect x="2"  y="10" width="2" height="2" fill="#E8902A"/>
+      <rect x="0"  y="6" width="2" height="2" fill="#E8902A"/>
+      <!-- PETALS (front ring — brighter) -->
+      <rect x="4"  y="2" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="8"  y="2" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="10" y="4" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="10" y="8" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="8"  y="10" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="4"  y="10" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="2"  y="8" width="2" height="2" fill="#F5BE3A"/>
+      <rect x="2"  y="4" width="2" height="2" fill="#F5BE3A"/>
+      <!-- BROWN CENTER -->
+      <rect x="4" y="4" width="6" height="6" fill="#6B3E1F"/>
+      <rect x="5" y="5" width="4" height="4" fill="#8A5328"/>
+      <rect x="6" y="6" width="2" height="2" fill="#4A2710"/>
+      <!-- TINY EYES on the sunflower (matches the girl's chibi style) -->
+      <rect class="flower-eye" x="5" y="7" width="1" height="1" fill="#1A0F08"/>
+      <rect class="flower-eye" x="8" y="7" width="1" height="1" fill="#1A0F08"/>
+    </g>
+    <!-- STEM -->
+    <rect x="7" y="13" width="2" height="10" fill="#4D7A38"/>
+    <!-- LEAVES -->
+    <rect x="3" y="16" width="2" height="2" fill="#5A8C42"/>
+    <rect x="5" y="17" width="2" height="1" fill="#5A8C42"/>
+    <rect x="11" y="18" width="2" height="2" fill="#5A8C42"/>
+    <rect x="9" y="19" width="2" height="1" fill="#5A8C42"/>
+  </svg>
+
+  <!-- Tiny dust puff for the jitter anim -->
+  <div class="pet-dust"></div>
+  <!-- Sparkle for the happy-transition celebration -->
+  <div class="pet-spark"></div>
+</div>
+
+<!-- Old pet-sunflower (kept hidden so old JS doesn't error) -->
+<div class="pet-sunflower" id="petSunflower" aria-hidden="true" style="display:none;">
+  <div class="sun-stem">
+    <svg viewBox="0 0 30 120" preserveAspectRatio="none">
+      <path d="M 15 120 Q 13 90 15 60 Q 17 30 15 0" stroke="#4D7A38" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M 15 70 Q 8 64 4 70 Q 8 76 15 74 Z" fill="#5A8C42"/>
+      <path d="M 15 50 Q 22 44 26 50 Q 22 56 15 54 Z" fill="#5A8C42"/>
+    </svg>
+  </div>
+  <div class="sun-head" id="sunHead">
+    <svg viewBox="0 0 120 120">
+      <defs>
+        <!-- Petal gradient — warm honey base, bright marigold tip -->
+        <radialGradient id="petalGrad" cx="50%" cy="92%" r="80%">
+          <stop offset="0%"  stop-color="#E8902A"/>
+          <stop offset="55%" stop-color="#F5B83A"/>
+          <stop offset="100%" stop-color="#FFD56A"/>
+        </radialGradient>
+        <radialGradient id="petalBackGrad" cx="50%" cy="92%" r="80%">
+          <stop offset="0%"  stop-color="#C97718"/>
+          <stop offset="100%" stop-color="#E8A030"/>
+        </radialGradient>
+        <!-- Brown center disc gradient — deeper in middle, warmer at rim -->
+        <radialGradient id="discGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stop-color="#4A2710"/>
+          <stop offset="70%" stop-color="#6E3E1B"/>
+          <stop offset="100%" stop-color="#8A5328"/>
+        </radialGradient>
+        <!-- Eye gradient — gives the eyes depth -->
+        <radialGradient id="eyeGrad" cx="35%" cy="30%" r="80%">
+          <stop offset="0%"  stop-color="#3A2418"/>
+          <stop offset="100%" stop-color="#1A0F08"/>
+        </radialGradient>
+      </defs>
+
+      <!-- BACK ring of 12 petals — slightly smaller, darker, rotated 15° so
+           it peeks between the front-ring petals for depth. -->
+      <g class="petals-back">
+        <g transform="rotate(15 60 60)">
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(0 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(30 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(60 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(90 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(120 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(150 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(180 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(210 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(240 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(270 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(300 60 60)"/>
+          <path d="M 60 60 Q 52 35 60 14 Q 68 35 60 60 Z" fill="url(#petalBackGrad)" transform="rotate(330 60 60)"/>
+        </g>
+      </g>
+
+      <!-- FRONT ring of 12 petals — bigger, brighter, teardrop shape with curve.
+           Each petal has a subtle stroke for hand-drawn feel. -->
+      <g class="petals-front">
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(0 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(30 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(60 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(90 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(120 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(150 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(180 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(210 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(240 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(270 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(300 60 60)"/>
+        <path d="M 60 60 Q 48 30 60 6 Q 72 30 60 60 Z" fill="url(#petalGrad)" stroke="#C97718" stroke-width="0.8" stroke-linejoin="round" transform="rotate(330 60 60)"/>
+      </g>
+
+      <!-- Brown center disc with subtle highlight crescent on top -->
+      <circle cx="60" cy="60" r="24" fill="url(#discGrad)"/>
+      <path d="M 44 52 Q 60 42 76 52" stroke="rgba(255, 220, 170, 0.18)" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- Tiny seed dots — clustered in concentric rings for natural feel -->
+      <g class="seeds" fill="#3A2410" opacity="0.7">
+        <circle cx="60" cy="48" r="0.9"/><circle cx="66" cy="50" r="0.9"/><circle cx="70" cy="56" r="0.9"/>
+        <circle cx="70" cy="64" r="0.9"/><circle cx="66" cy="70" r="0.9"/><circle cx="60" cy="72" r="0.9"/>
+        <circle cx="54" cy="70" r="0.9"/><circle cx="50" cy="64" r="0.9"/><circle cx="50" cy="56" r="0.9"/>
+        <circle cx="54" cy="50" r="0.9"/>
+        <circle cx="60" cy="56" r="0.7"/><circle cx="64" cy="60" r="0.7"/><circle cx="60" cy="64" r="0.7"/>
+        <circle cx="56" cy="60" r="0.7"/>
+      </g>
+
+      <!-- KAWAII FACE — big shiny eyes, soft smile, peach cheeks -->
+      <g class="face">
+        <!-- Cheek blushes (sit behind eyes for soft layered feel) -->
+        <ellipse class="cheek cheek-left"  cx="48" cy="68" rx="3.2" ry="1.6" fill="#F4A6B0" opacity="0.7"/>
+        <ellipse class="cheek cheek-right" cx="72" cy="68" rx="3.2" ry="1.6" fill="#F4A6B0" opacity="0.7"/>
+        <!-- Big anime eyes — radial gradient + multiple highlight dots -->
+        <ellipse class="eye eye-left"  cx="52" cy="60" rx="3" ry="4" fill="url(#eyeGrad)"/>
+        <ellipse class="eye eye-right" cx="68" cy="60" rx="3" ry="4" fill="url(#eyeGrad)"/>
+        <!-- Primary white shine -->
+        <ellipse class="eye-glint eye-glint-left"  cx="53.2" cy="58.5" rx="1" ry="1.4" fill="#FFFFFF"/>
+        <ellipse class="eye-glint eye-glint-right" cx="69.2" cy="58.5" rx="1" ry="1.4" fill="#FFFFFF"/>
+        <!-- Secondary tiny sparkle for life -->
+        <circle class="eye-glint eye-glint-left"  cx="51.2" cy="61.6" r="0.55" fill="#FFFFFF" opacity="0.75"/>
+        <circle class="eye-glint eye-glint-right" cx="67.2" cy="61.6" r="0.55" fill="#FFFFFF" opacity="0.75"/>
+        <!-- Closed eyes (only show in sleeping state) — soft arcs -->
+        <path class="closed-eye" d="M 49 60 Q 52 62.5 55 60" stroke="#3A2418" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path class="closed-eye" d="M 65 60 Q 68 62.5 71 60" stroke="#3A2418" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <!-- Tiny "ω" style mouth — kawaii smile -->
+        <path class="mouth" d="M 56 67 Q 58 70 60 68 Q 62 70 64 67" stroke="#3A2418" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- Firefly companion — appears in dark mode, drifts toward cursor with delay -->
+<div class="firefly" id="firefly" aria-hidden="true">
+  <div class="firefly-body"></div>
+</div>
+
+<!-- Tiny bird flock — V-formation crosses the sky once every ~2 minutes -->
+<div class="bird-flock" id="birdFlock" aria-hidden="true"></div>
+
+<div class="clouds">
+  <div class="cloud c1"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+  <div class="cloud c2"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+  <div class="cloud c3"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+  <div class="cloud c4"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+  <div class="cloud c5"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+</div>
+
+<!-- Hand-drawn wisp curls — sketchy wind doodles drifting alongside the clouds.
+     Match the storybook spiral marks in the reference illustration. -->
+<div class="wisps" aria-hidden="true">
+  <svg class="wisp w1" viewBox="0 0 60 20"><path d="M 2 12 Q 10 4 18 12 Q 26 20 34 12 Q 42 4 50 12 Q 56 16 58 12"/></svg>
+  <svg class="wisp w2" viewBox="0 0 40 22"><path d="M 2 16 Q 8 6 18 12 Q 22 18 16 18 Q 12 18 18 12 Q 26 6 36 14"/></svg>
+  <svg class="wisp w3" viewBox="0 0 50 18"><path d="M 4 10 Q 12 2 20 10 Q 28 18 36 10 Q 42 4 48 10"/></svg>
+  <svg class="wisp w4" viewBox="0 0 35 25"><path d="M 4 14 Q 10 4 16 12 Q 22 20 16 22 Q 10 22 16 14 Q 24 6 32 14"/></svg>
+  <svg class="wisp w5" viewBox="0 0 55 18"><path d="M 3 10 Q 12 2 22 10 Q 32 18 42 10 Q 48 4 53 10"/></svg>
+  <svg class="wisp w6" viewBox="0 0 38 22"><path d="M 3 16 Q 9 6 19 12 Q 23 18 17 18 Q 13 18 19 12 Q 27 6 35 14"/></svg>
+</div>
+
+<nav>
+  <div class="nav-left">
+    <a class="brand" href="#top">Avantika Linguini</a>
+    <!-- Scroll mode nav — links to page sections -->
+    <div class="nav-links nav-scroll">
+      <a href="#about" data-section="about">About</a>
+      <a href="#experience" data-section="experience">Experience</a>
+      <a href="#projects" data-section="projects">Projects</a>
+      <a href="#wetlab" data-section="wetlab">Wet Lab</a>
+      <a href="#disciplines" data-section="disciplines">Disciplines</a>
+      <a href="#contact" data-section="contact">Contact</a>
+    </div>
+    <!-- Carousel mode nav — links to carousel cards -->
+    <div class="nav-links nav-carousel">
+      <a href="#" data-card="0">About</a>
+      <a href="#" data-card="1">OMEGA Labs</a>
+      <a href="#" data-card="2">BioMotion Lab</a>
+      <a href="#" data-card="3">Object Detection</a>
+      <a href="#" data-card="4">Portfolio</a>
+      <a href="#" data-card="5">Avatar</a>
+      <a href="#" data-card="6">Contact</a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="scroll-pill" id="scrollModeBtn" aria-label="Scroll mode">
+      <svg viewBox="0 0 20 20" aria-hidden="true" fill="none">
+        <!-- Three thin stacked rows — Natalie's minimalist list icon -->
+        <line class="sp-row" x1="4" y1="6" x2="16" y2="6" stroke-width="1.4" stroke-linecap="round"/>
+        <line class="sp-row" x1="4" y1="10" x2="16" y2="10" stroke-width="1.4" stroke-linecap="round"/>
+        <line class="sp-row" x1="4" y1="14" x2="16" y2="14" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span>Scroll</span>
+    </button>
+    <button class="theme-toggle" id="themeBtn" aria-label="Toggle light or dark mode">
+      <!-- Sun (light mode) / Moon (dark mode) — swaps via CSS based on data-theme -->
+      <svg class="icon-sun" viewBox="0 0 32 32" aria-hidden="true">
+        <!-- Chunky 8-ray sunburst — Natalie's design: solid core + short stub rays -->
+        <g class="sun-rays" stroke-linecap="round" stroke-width="2.4">
+          <line x1="16" y1="2.5" x2="16" y2="6"/>
+          <line x1="16" y1="26" x2="16" y2="29.5"/>
+          <line x1="2.5" y1="16" x2="6" y2="16"/>
+          <line x1="26" y1="16" x2="29.5" y2="16"/>
+          <line x1="6.5" y1="6.5" x2="9" y2="9"/>
+          <line x1="23" y1="23" x2="25.5" y2="25.5"/>
+          <line x1="6.5" y1="25.5" x2="9" y2="23"/>
+          <line x1="23" y1="9" x2="25.5" y2="6.5"/>
+        </g>
+        <circle class="sun-core" cx="16" cy="16" r="6.2"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M22 17.5A10 10 0 0 1 12.2 7a8 8 0 1 0 11.4 11.4A10 10 0 0 1 22 17.5z"/>
+      </svg>
+    </button>
+    <button class="carousel-pill" id="carouselBtn" aria-label="Carousel mode">
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <!-- Three vertical filled bars — Natalie's exact carousel glyph -->
+        <rect class="cp-bar" x="3" y="4" width="3.2" height="12" rx="1.1"/>
+        <rect class="cp-bar" x="8.4" y="4" width="3.2" height="12" rx="1.1"/>
+        <rect class="cp-bar" x="13.8" y="4" width="3.2" height="12" rx="1.1"/>
+      </svg>
+      <span>Carousel</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO — name only -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <h1 class="name"><span id="petTargetA">A</span>vantika Linguin<span id="petTargetI">i</span></h1>
+  </div>
+</section>
+
+<!-- ABOUT — placeholder, see the message for alternatives -->
+<section id="about">
+  <div class="wrap">
+    <div class="section-meta"><span class="num">01.</span><span>about</span><span class="line"></span></div>
+    <h2 class="about-headline">Software that talks to biology.</h2>
+    <div class="about-text">
+      <p>BSc Specialized Honours in Biotechnology from York, graduating April 2026. I work across data engineering, iOS, web, and wet lab science — usually in the same week. The thread is always: build carefully, ship things, learn fast.</p>
+    </div>
+
+    <div class="about-substory">
+      <h3>What I build.</h3>
+      <p>Data pipelines for AI models trained on multimodal video at OMEGA Labs. A date-navigation feature inside an Electron desktop app used daily by thousands. Native iOS apps with on-device generation. Python automation tools that survived a cGMP audit at a vaccine plant. Flask and FastAPI dashboards, SwiftUI prototypes, R notebooks for thesis analysis — whatever the next problem needs.</p>
+    </div>
+
+    <div class="about-substory">
+      <h3>One thing about me.</h3>
+      <p>I shipped my first iOS app — Avatar, an AI character generator — at 19, the summer before I took a single CS class. I learned Swift and DALL·E in parallel, watched strangers download something I made, and never looked back. Now I want to keep being one of those people who builds careful consumer software at the intersection of biology and tech — products designed by people who actually understand the science behind them.</p>
+    </div>
+
+    <div class="about-substory">
+      <h3>Hyderabad to Toronto.</h3>
+      <p>Born and raised in Hyderabad. Cambridge A-Levels there, then Toronto in 2022 for university. I speak English, Urdu, Hindi, Sindhi, and some French.</p>
+    </div>
+
+    <div class="about-substory">
+      <h3>This past year.</h3>
+      <p>Knocked out the ADE2 gene in <em>S. cerevisiae</em> with CRISPR-Cas9. Synthesized SARS-CoV-2 spike mRNA in vitro. Finished an honours thesis on how people coordinate eye contact across video calls — turns out they mostly avoid it, and the data is wild. Currently reading <em>Designing Data-Intensive Applications</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 · WORK EXPERIENCE ===== -->
+<section id="experience">
+  <div class="wrap">
+    <div class="section-meta"><span class="num">02.</span><span>work experience</span><span class="line"></span></div>
+    <h2>Work <span class="accent">experience.</span></h2>
+    <div class="exp-list">
+      <a class="exp-item" href="https://www.omega.inc/" target="_blank" rel="noopener">
+        <div class="exp-year">2024 → 2026</div>
+        <div class="exp-body">
+          <div class="exp-title">OMEGA Labs <span class="role">— Data Engineer</span><span class="ext">↗</span></div>
+          <div class="exp-role">AI startup on the Bittensor decentralized network. Focus, Muse, multimodal models.</div>
+          <div class="exp-detail">Reviewed PRs across the data backend (FastAPI, PostgreSQL, SQLAlchemy, Alembic) and AI agent stack. Shipped a date-navigation feature in the Focus desktop app (Electron, React, TypeScript, Redux). Ran sprint coordination on JIRA and Confluence.</div>
+        </div>
+        <div class="exp-meta">omega.inc</div>
+      </a>
+      <a class="exp-item" href="https://www.sanofi.com/" target="_blank" rel="noopener">
+        <div class="exp-year">2024 → 2025</div>
+        <div class="exp-body">
+          <div class="exp-title">Sanofi Pasteur <span class="role">— B92 M&amp;S Co-Op</span><span class="ext">↗</span></div>
+          <div class="exp-role">Formulations, Media, Washing &amp; Sterilizing. cGMP, FDA &amp; Health Canada inspected.</div>
+          <div class="exp-detail">Built a Python batch-printing automation tool and Excel/VBA validation workbook for SMS compliance. Managed lifecycle data for 100+ IPV assets in SAP iShift. Led the CCR project for stainless mesh filter removal through formal change-control.</div>
+        </div>
+        <div class="exp-meta">Toronto</div>
+      </a>
+      <a class="exp-item" href="https://www.yorku.ca/research/biomotionlab/" target="_blank" rel="noopener">
+        <div class="exp-year">2025 → 2026</div>
+        <div class="exp-body">
+          <div class="exp-title">BioMotion Lab <span class="role">— Research Assistant</span><span class="ext">↗</span></div>
+          <div class="exp-role">Centre for Vision Research. Prof. Nikolaus Troje.</div>
+          <div class="exp-detail">Designed a normalized MySQL schema and PHP backend for the body-image experiment. Built Python ETL pipelines for thesis data in Python and R / RStudio. Rebuilt the lab website on WordPress and managed all lab data on SiteGround.</div>
+        </div>
+        <div class="exp-meta">York U</div>
+      </a>
+      <a class="exp-item" href="SARIT_Object_Detection_Report.pdf" target="_blank">
+        <div class="exp-year">2023 → 2024</div>
+        <div class="exp-body">
+          <div class="exp-title">Lassonde Engineering <span class="role">— Research Assistant</span><span class="ext">↗</span></div>
+          <div class="exp-role">SARIT Micromobility EV Project. Lassonde Undergraduate Research Award.</div>
+          <div class="exp-detail">Developed the SARIT Object Detection System on Raspberry Pi 4 (Python, OpenCV, SSD MobileNet) and the Fleet Management Web App (Python, Flask, MySQL, SQLAlchemy, Leaflet.js, SendGrid, Alembic). Showcased at Canadian International AutoShow 2023.</div>
+        </div>
+        <div class="exp-meta">PDF</div>
+      </a>
+      <a class="exp-item" href="https://www.wombo.ai/" target="_blank" rel="noopener">
+        <div class="exp-year">2022 → 2023</div>
+        <div class="exp-body">
+          <div class="exp-title">WOMBO Inc. <span class="role">— Content Intern</span><span class="ext">↗</span></div>
+          <div class="exp-role">Studio behind Dream by WOMBO. Google Play Best of 2022. 200M+ downloads.</div>
+          <div class="exp-detail">Collected and annotated AI training data for the image and lip-sync pipelines. Edited deepfake videos in Adobe Premier Pro, ran the Instagram and TikTok accounts, analyzed user-acquisition in Google Analytics.</div>
+        </div>
+        <div class="exp-meta">Toronto</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 · PROJECTS ===== -->
+<section id="projects">
+  <div class="wrap">
+    <div class="section-meta"><span class="num">03.</span><span>projects</span><span class="line"></span></div>
+    <h2><span class="accent">Projects.</span></h2>
+    <div class="projects">
+
+      <a href="https://apps.apple.com/app/id6479072498" target="_blank" class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">apps.apple.com/app/avatar</span></div>
+          <img src="avatar_screenshot.png" alt="Avatar iOS app screenshot" class="preview-image">
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">iOS App · 2024</div>
+          <div class="project-name">Avatar: AI-Created Characters <span class="ext">↗</span></div>
+          <div class="project-desc">An iOS app I built solo and shipped to the Apple App Store. Turns multi-step user prompts into AI-generated character art via DALL-E 3. Across iOS, iPadOS, macOS Apple Silicon, and visionOS.</div>
+          <div class="project-stack">
+            <span class="stack-chip">Swift</span><span class="stack-chip">SwiftUI</span><span class="stack-chip">DALL-E 3</span><span class="stack-chip">Unity Ads</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">avantika.linguini · this site</span></div>
+          <img src="portfolio_self.png" alt="This portfolio" class="preview-image">
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Web · 2026</div>
+          <div class="project-name">This Portfolio</div>
+          <div class="project-desc">Built from scratch in vanilla HTML, CSS, and JS. The sky shifts from sunrise to sunset as you scroll; clouds drift with silver linings; stars come out at twilight. Plus a carousel mode for quick browsing.</div>
+          <div class="project-stack">
+            <span class="stack-chip">HTML</span><span class="stack-chip">CSS</span><span class="stack-chip">Vanilla JS</span><span class="stack-chip">SVG</span><span class="stack-chip">requestAnimationFrame</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Digital toolkit — one compact card, four labeled rows -->
+    <div class="digital-stack">
+      <div class="stack-header">
+        <div class="stack-eyebrow">// toolkit</div>
+        <h3 class="stack-title">What I work with.</h3>
+      </div>
+      <div class="stack-grid">
+        <div class="stack-row">
+          <div class="stack-label">code</div>
+          <div class="stack-chips">
+            <span class="skill-chip">Python</span><span class="skill-chip">SQL</span><span class="skill-chip">R</span><span class="skill-chip">TypeScript</span><span class="skill-chip">JavaScript</span><span class="skill-chip">Swift</span><span class="skill-chip">PHP</span><span class="skill-chip">VBA</span><span class="skill-chip">Bash</span>
+          </div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-label">build</div>
+          <div class="stack-chips">
+            <span class="skill-chip">React</span><span class="skill-chip">SwiftUI</span><span class="skill-chip">Electron</span><span class="skill-chip">Flask</span><span class="skill-chip">FastAPI</span><span class="skill-chip">Tailwind</span><span class="skill-chip">OpenAI API</span><span class="skill-chip">OpenCV</span>
+          </div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-label">data</div>
+          <div class="stack-chips">
+            <span class="skill-chip">PostgreSQL</span><span class="skill-chip">Snowflake</span><span class="skill-chip">dbt</span><span class="skill-chip">Airflow</span><span class="skill-chip">pandas</span><span class="skill-chip">NumPy</span><span class="skill-chip">scikit-learn</span><span class="skill-chip">statsmodels</span>
+          </div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-label">ship</div>
+          <div class="stack-chips">
+            <span class="skill-chip">AWS</span><span class="skill-chip">GCP</span><span class="skill-chip">Docker</span><span class="skill-chip">Git</span><span class="skill-chip">GitHub Actions</span><span class="skill-chip">Power BI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 · WET SCIENCE LAB ===== -->
+<section id="wetlab">
+  <div class="wrap">
+    <div class="section-meta"><span class="num">04.</span><span>wet science lab</span><span class="line"></span></div>
+    <h2>Wet science <span class="accent">lab.</span></h2>
+    <p style="font-family:var(--body); font-size:16px; color:var(--ink-soft); max-width:640px; margin-top:-8px; margin-bottom:8px;">A year of CRISPR knockouts, mRNA synthesis, MAPK westerns, and an honours thesis. Click to expand the full lab notebook.</p>
+
+    <details class="wetlab-details">
+      <summary>
+        <span class="summary-eyebrow">9 projects</span>
+        <span class="summary-text">Open the lab notebook</span>
+        <span class="summary-chevron">▾</span>
+      </summary>
+      <div class="wetlab-contents">
+    <div class="projects">
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 4290 · Lab 2 · S. cerevisiae</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">CRISPR-Cas9<br/>ADE2 Knockout</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">CRISPR-Cas9 ADE2 Knockout</div>
+          <div class="project-desc">Built the pML104-ADE2 plasmid by annealing custom sgRNA oligos into the BclI/SwaI cloning site. Amplified in E. coli, then transformed into yeast where Cas9 cut the ADE2 gene and HDR with a donor template introduced a premature stop codon. Read out as red colonies on SC/-URA plates.</div>
+          <div class="project-stack">
+            <span class="stack-chip">CRISPR-Cas9</span><span class="stack-chip">sgRNA design</span><span class="stack-chip">HDR</span><span class="stack-chip">Yeast transformation</span><span class="stack-chip">pML104</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 4290 · Lab 4 · BL21</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">SARS-CoV-2<br/>Spike mRNA</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">In Vitro Synthesis of SARS-CoV-2 Spike mRNA</div>
+          <div class="project-desc">Expressed His6-tagged T7 RNA polymerase in E. coli BL21 with IPTG induction, purified by Ni-NTA affinity chromatography (Bradford-quantified), linearized a pTwist-SARS-CoV-2-spike plasmid with EcoRI-HF, and ran in vitro transcription to generate spike protein mRNA.</div>
+          <div class="project-stack">
+            <span class="stack-chip">T7 RNA polymerase</span><span class="stack-chip">Ni-NTA</span><span class="stack-chip">IPTG induction</span><span class="stack-chip">In vitro transcription</span><span class="stack-chip">EcoRI-HF</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 4290 · Lab 3 · rat L6 cells</span></div>
+          <img src="lab_western_blot.jpg" alt="Western blot of MAP kinase from rat L6 skeletal muscle cells" class="preview-image">
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">MAP Kinase Immunoprecipitation + Western Blot</div>
+          <div class="project-desc">Cultured rat L6 skeletal muscle cells in a Class II biosafety cabinet, stimulated with insulin, immunoprecipitated MAP kinase, ran SDS-PAGE + PVDF transfer, probed with anti-phospho-MAPK, and detected by ECL chemiluminescence.</div>
+          <div class="project-stack">
+            <span class="stack-chip">Mammalian cell culture</span><span class="stack-chip">IP</span><span class="stack-chip">SDS-PAGE</span><span class="stack-chip">PVDF</span><span class="stack-chip">anti-phospho-MAPK</span><span class="stack-chip">ECL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 4290 · Lab 1 · N. benthamiana</span></div>
+          <img src="lab_agarose_gel.jpg" alt="Agarose gel showing RT-PCR products of PAP gene detection in transgenic tobacco" class="preview-image">
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">Agrobacterium-Mediated Transient Expression</div>
+          <div class="project-desc">Transformed <em>Nicotiana benthamiana</em> via <em>Agrobacterium</em> to transiently express the RUBY reporter (turns leaves red via betalain biosynthesis), then detected PAP gene expression in transgenic tobacco by RNA isolation, reverse transcription, RT-PCR, and agarose gel electrophoresis.</div>
+          <div class="project-stack">
+            <span class="stack-chip">Agrobacterium transformation</span><span class="stack-chip">RUBY reporter</span><span class="stack-chip">RNA isolation</span><span class="stack-chip">RT-PCR</span><span class="stack-chip">Agarose gel</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 3140 · Project 4 · B. licheniformis</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">α-Amylase<br/>Cloning</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">α-Amylase Cloning from B. licheniformis</div>
+          <div class="project-desc">End-to-end cloning: extracted genomic DNA from <em>B. licheniformis</em>, PCR-amplified the α-amylase gene, double-digested into the pET15 vector, ligated, transformed E. coli, screened by colony PCR, then ran α-amylase enzyme activity assays on the recombinants.</div>
+          <div class="project-stack">
+            <span class="stack-chip">gDNA isolation</span><span class="stack-chip">PCR cloning</span><span class="stack-chip">Restriction digest</span><span class="stack-chip">Ligation</span><span class="stack-chip">Colony PCR</span><span class="stack-chip">Enzyme activity</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 3140 · Project 3 · pAMY8</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">Restriction<br/>Mapping</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">Restriction Mapping of pAMY8</div>
+          <div class="project-desc">Set up restriction digests of the α-amylase-containing plasmid pAMY8 with single and double enzyme combinations, resolved fragments on agarose gels, and reconstructed the full restriction map from band sizes.</div>
+          <div class="project-stack">
+            <span class="stack-chip">Restriction enzymes</span><span class="stack-chip">Agarose gel</span><span class="stack-chip">Fragment analysis</span><span class="stack-chip">Plasmid mapping</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 3140 · Project 2 · SDS-PAGE</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">SDS-PAGE +<br/>Western Blot</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Wet Lab · 2026</div>
+          <div class="project-name">Protein Analysis Module</div>
+          <div class="project-desc">Prepared protein samples for SDS-PAGE, cast two polyacrylamide gels, ran the gels, stained one with Coomassie Blue for total protein, and used the second for overnight Western blot transfer + chemiluminescent detection.</div>
+          <div class="project-stack">
+            <span class="stack-chip">SDS-PAGE casting</span><span class="stack-chip">Coomassie stain</span><span class="stack-chip">Western blot transfer</span><span class="stack-chip">Chemiluminescent detection</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 4000 · Honours Thesis</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">Mutual Gaze<br/>Research Pipeline</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Research · 2026</div>
+          <div class="project-name">Mutual Gaze Pipeline (Honours Thesis)</div>
+          <div class="project-desc">"Seeking or Avoiding Mutual Gaze: Quantifying Gaze Coordination Across Communication Media." Ran eye-tracking on 50+ participants across face-to-face, window, and Zoom conditions. Designed the MySQL schema, Python/R ETL, and statistical analysis end-to-end.</div>
+          <div class="project-stack">
+            <span class="stack-chip">Eye-tracking</span><span class="stack-chip">Python</span><span class="stack-chip">R / RStudio</span><span class="stack-chip">MySQL</span><span class="stack-chip">Monte Carlo</span><span class="stack-chip">Kaplan-Meier</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-preview">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">BIOL 4290 · Synth Bio Presentation</span></div>
+          <div class="preview-content"><div class="project-preview-fallback">Tyrian Purple<br/>Metabolic Engineering</div></div>
+        </div>
+        <div class="project-body">
+          <div class="project-eyebrow">Paper Talk · 2026</div>
+          <div class="project-name">Tyrian Purple Biosynthesis</div>
+          <div class="project-desc">Presented Li et al. (2024, <em>Metabolic Engineering</em>) on one-pot biosynthesis of Tyrian purple in E. coli using a flavin-dependent halogenase (SttH-Fre fusion) + a two-component monooxygenase (GS-C/GS-D). Walked through the selectivity problem with TnaA and the engineered solution.</div>
+          <div class="project-stack">
+            <span class="stack-chip">Synthetic biology</span><span class="stack-chip">Metabolic engineering</span><span class="stack-chip">Halogenase chemistry</span><span class="stack-chip">E. coli</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bench toolkit — compact stack matching the Digital toolkit pattern -->
+    <div class="digital-stack bench-stack">
+      <div class="stack-header">
+        <div class="stack-eyebrow">// bench toolkit</div>
+        <h3 class="stack-title">At the bench.</h3>
+      </div>
+      <div class="stack-grid">
+        <div class="stack-row">
+          <div class="stack-label">techniques</div>
+          <div class="stack-chips">
+            <span class="skill-chip">CRISPR-Cas9</span><span class="skill-chip">sgRNA design</span><span class="skill-chip">HDR templates</span><span class="skill-chip">Yeast transformation</span><span class="skill-chip">Cell culture</span><span class="skill-chip">Class II biosafety</span><span class="skill-chip">Western blot</span><span class="skill-chip">Immunoprecipitation</span><span class="skill-chip">SDS-PAGE</span><span class="skill-chip">Coomassie staining</span><span class="skill-chip">ECL detection</span><span class="skill-chip">BL21 / IPTG</span><span class="skill-chip">Ni-NTA chromatography</span><span class="skill-chip">Bradford assay</span><span class="skill-chip">PCR / RT-PCR</span><span class="skill-chip">Restriction mapping</span><span class="skill-chip">Molecular cloning</span><span class="skill-chip">Plasmid prep</span><span class="skill-chip">In vitro transcription</span><span class="skill-chip">Agrobacterium</span><span class="skill-chip">gDNA isolation</span><span class="skill-chip">Aseptic technique</span><span class="skill-chip">Microbial ID</span><span class="skill-chip">cGMP / GMP</span><span class="skill-chip">FDA readiness</span><span class="skill-chip">SAP iShift</span><span class="skill-chip">Qualipso eQMS</span>
+          </div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-label">writing</div>
+          <div class="stack-chips">
+            <span class="skill-chip">Lab reports (15+ in 2026)</span><span class="skill-chip">Honours Thesis (BIOL 4000)</span><span class="skill-chip">Research proposal</span><span class="skill-chip">Methods writing</span><span class="skill-chip">Statistical results</span><span class="skill-chip">Figures &amp; tables</span><span class="skill-chip">Paper presentations</span><span class="skill-chip">LaTeX</span><span class="skill-chip">Scientific citation</span>
+          </div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-label">concepts</div>
+          <div class="stack-chips">
+            <span class="skill-chip">DNA replication</span><span class="skill-chip">Transcription &amp; RNA</span><span class="skill-chip">Gene regulation</span><span class="skill-chip">Enzyme kinetics</span><span class="skill-chip">Metabolism</span><span class="skill-chip">Population genetics</span><span class="skill-chip">Cell signaling</span><span class="skill-chip">Cell cycle</span><span class="skill-chip">Antibody / MHC</span><span class="skill-chip">Vaccine biology</span><span class="skill-chip">Viral life cycles</span><span class="skill-chip">Bacterial growth</span><span class="skill-chip">Embryonic development</span><span class="skill-chip">Stem cells</span><span class="skill-chip">Gene therapy</span><span class="skill-chip">Synthetic biology</span><span class="skill-chip">Metabolic engineering</span><span class="skill-chip">Bioremediation</span><span class="skill-chip">GMOs</span><span class="skill-chip">Organic mechanisms</span><span class="skill-chip">IR / NMR / MS</span><span class="skill-chip">HPLC / GC</span><span class="skill-chip">Stereochemistry</span>
+          </div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-label">bio + data</div>
+          <div class="stack-chips">
+            <span class="skill-chip">BLAST</span><span class="skill-chip">Sequence alignment</span><span class="skill-chip">Linux / Bash</span><span class="skill-chip">R / RStudio</span><span class="skill-chip">Python (Biopython)</span><span class="skill-chip">Phylogenetics</span><span class="skill-chip">Statistical genetics</span><span class="skill-chip">Eye-tracking pipelines</span><span class="skill-chip">Monte Carlo</span><span class="skill-chip">Kaplan-Meier</span><span class="skill-chip">Mixed-effects models</span><span class="skill-chip">ANOVA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ===== 05 · DISCIPLINES ===== -->
+<section id="disciplines">
+  <div class="wrap">
+    <div class="section-meta"><span class="num">05.</span><span>disciplines</span><span class="line"></span></div>
+    <h2>I float <span class="accent">between.</span></h2>
+    <p class="disciplines">
+      <span>biotechnology</span><span class="sep">·</span><span>molecular biology</span><span class="sep">·</span><span>CRISPR / genetic engineering</span><span class="sep">·</span><span>synthetic biology</span><span class="sep">·</span><span>immunology</span><span class="sep">·</span><span>cell biology</span><span class="sep">·</span><span>bioinformatics</span><span class="sep">·</span><span>vision research</span><span class="sep">·</span><span>cGMP &amp; regulated data</span><span class="sep">·</span><span>data engineering</span><span class="sep">·</span><span>AI &amp; ML</span><span class="sep">·</span><span>full-stack web</span><span class="sep">·</span><span>iOS development</span><span class="sep">·</span><span>statistical modeling</span><span class="sep">·</span><span>content &amp; design</span><span class="sep">·</span><span>photography</span>.
+    </p>
+  </div>
+</section>
+
+<!-- CONTACT — Avantika's own voice -->
+<section id="contact">
+  <div class="wrap">
+
+    <h2 class="contact-title">Reach out.</h2>
+    <p class="contact-intro">I'm in Toronto, graduating April 2026. If you're working at the intersection of biology and software — building consumer products with science behind them, growing an AI startup, or just running a wet lab that needs better tools — I want to hear from you. Especially if you're hiring a new grad, or you're a student figuring out what to build next.</p>
+
+    <div class="contact-rows">
+      <div class="contact-row">
+        <span class="label">Email</span>
+        <a href="mailto:utamavantika@gmail.com">utamavantika@gmail.com</a>
+      </div>
+      <div class="contact-row">
+        <span class="label">LinkedIn</span>
+        <a href="https://linkedin.com/in/avanu16" target="_blank">/in/avanu16</a>
+      </div>
+      <div class="contact-row">
+        <span class="label">GitHub</span>
+        <a href="https://github.com/aviu16" target="_blank">@aviu16</a>
+      </div>
+      <div class="contact-row">
+        <span class="label">Avatar</span>
+        <a href="https://apps.apple.com/app/id6479072498" target="_blank">my iOS app on the App Store</a>
+      </div>
+    </div>
+
+    <a href="#" class="download-cv">Download résumé ↗</a>
+
+    <div class="yap-title">Things I'll happily talk your ear off about.</div>
+    <div class="yap-list">
+      <div class="yap-item">
+        <div class="yap-head"><span class="icon">👁</span><span class="name">Why nobody makes eye contact on Zoom</span></div>
+        <div class="yap-desc">My honours thesis. The survival curves are wild.</div>
+      </div>
+      <div class="yap-item">
+        <div class="yap-head"><span class="icon">🧬</span><span class="name">Wet-lab life as a software person</span></div>
+        <div class="yap-desc">CRISPR knockouts, mRNA synthesis, Western blots — and how data engineering changes after you've done them.</div>
+      </div>
+      <div class="yap-item">
+        <div class="yap-head"><span class="icon">📱</span><span class="name">Shipping iOS alone, before CS class</span></div>
+        <div class="yap-desc">How I built Avatar in a summer with no degree, no co-founder, and a lot of YouTube.</div>
+      </div>
+      <div class="yap-item">
+        <div class="yap-head"><span class="icon">🌏</span><span class="name">Hyderabad → Toronto, five languages</span></div>
+        <div class="yap-desc">English, Urdu, Hindi, Sindhi, and enough French to apologize.</div>
+      </div>
+      <div class="yap-item">
+        <div class="yap-head"><span class="icon">📸</span><span class="name">Portrait photography since 2016</span></div>
+        <div class="yap-desc">My quietest practice. Mostly people I love.</div>
+      </div>
+      <div class="yap-item">
+        <div class="yap-head"><span class="icon">☕</span><span class="name">Toronto coffee shops</span></div>
+        <div class="yap-desc">I have an opinion about every one north of Queen.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Avantika · Toronto</span>
+  <span>built by hand</span>
+</footer>
+
+<!-- CAROUSEL -->
+<div class="carousel-stars" id="carouselStars"></div>
+<div class="carousel-hint" id="carouselHint">scroll → · esc to close</div>
+
+<div class="carousel-overlay" id="carousel">
+  <!-- Sunrise→sunset clouds + sun, same vibe as the scroll page -->
+  <div class="carousel-sun" aria-hidden="true"></div>
+  <div class="carousel-clouds" aria-hidden="true">
+    <div class="cl cl1"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+    <div class="cl cl2"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+    <div class="cl cl3"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+    <div class="cl cl4"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+    <div class="cl cl5"><svg viewBox="0 0 200 90"><path class="fill" d="M 25 65 Q 8 65 8 52 Q 8 38 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52 Q 142 65 124 65 Z"/><path class="silver" d="M 25 38 Q 30 20 52 20 Q 68 8 84 22 Q 110 16 116 38 Q 138 36 142 52"/></svg></div>
+  </div>
+  <div class="carousel-track">
+
+    <!-- 1. ABOUT (mustard, Natalie pattern) -->
+    <div class="card card-mustard">
+      <div class="card-body">
+        <h3 class="card-headline">Biology and software, on the same desk.</h3>
+
+        <p class="card-section-text">I'm a biotech grad who never stopped writing code. I try to build things that move comfortably between a wet lab and a python notebook — software that's careful enough to ship in production, and curious enough to keep teaching me biology.</p>
+
+        <div class="card-section">
+          <h4 class="card-section-title">Hyderabad kid</h4>
+          <p class="card-section-text">Grew up in Hyderabad, did Cambridge A-Levels, moved to Toronto in 2022. Five languages and a lot of dinner-table arguments. The internet was the first place I felt like I could build anything — I've been chasing that feeling ever since.</p>
+        </div>
+
+        <div class="card-section">
+          <h4 class="card-section-title">First app</h4>
+          <p class="card-section-text">One summer I taught myself Swift and shipped <em>Avatar</em> to the App Store. Designing my own characters, writing my own UI, watching a stranger download something I made — that's what got me hooked on shipping.</p>
+        </div>
+
+        <div class="card-section" style="margin-top: auto; padding-top: 4px;">
+          <h4 class="card-exp-title">Experience</h4>
+          <div class="card-exp-list">
+            <div class="card-exp-row">
+              <span class="yrs">2024 – Now</span>
+              <span class="role-line"><span><strong>OMEGA Labs</strong><span class="role">Head of Operations</span></span><span class="sub">Helping a small Toronto AI studio actually ship.</span></span>
+            </div>
+            <div class="card-exp-row">
+              <span class="yrs">2024 – 2025</span>
+              <span class="role-line"><span><strong>Sanofi Pasteur</strong><span class="role">B92 M&amp;S Co-Op</span></span><span class="sub">cGMP-grade vaccine manufacturing. Formulations, Media, W&amp;S.</span></span>
+            </div>
+            <div class="card-exp-row">
+              <span class="yrs">2025 – 2026</span>
+              <span class="role-line"><span><strong>BioMotion Lab</strong><span class="role">Honours thesis</span></span><span class="sub">An honours thesis on how people seek (or avoid) eye contact.</span></span>
+            </div>
+            <div class="card-exp-row">
+              <span class="yrs">2022 – 2023</span>
+              <span class="role-line"><span><strong>WOMBO</strong><span class="role">Content Intern</span></span><span class="sub">My first AI summer, editing deepfake videos.</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. OMEGA.inc (sunrise) — actual website -->
+    <div class="card card-wide scene-omega">
+      <div class="card-scene">
+        <div class="card-scene-bg"></div>
+        <a class="card-link-overlay" href="https://www.omega.inc/" target="_blank" aria-label="View OMEGA Labs"></a>
+        <a href="https://www.omega.inc/" target="_blank" class="card-toast">
+          <div class="toast-icon">Ω</div>
+          <div class="toast-text">
+            <div class="toast-title">omega.inc — the small AI studio I help ship at</div>
+            <div class="toast-cta">View OMEGA Labs ↗</div>
+          </div>
+        </a>
+        <div class="card-hero"><img src="omega.png" alt="omega.inc"></div>
+      </div>
+    </div>
+
+    <!-- 3. BIOMOTION (midday blue) -->
+    <div class="card card-wide scene-biomotion">
+      <div class="card-scene">
+        <div class="card-scene-bg"></div>
+        <a class="card-link-overlay" href="https://www.yorku.ca/research/biomotionlab/" target="_blank" aria-label="View BioMotion Lab"></a>
+        <a href="https://www.yorku.ca/research/biomotionlab/" target="_blank" class="card-toast">
+          <div class="toast-icon">B</div>
+          <div class="toast-text">
+            <div class="toast-title">An honours thesis on how people seek (or avoid) eye contact</div>
+            <div class="toast-cta">View BioMotion Lab ↗</div>
+          </div>
+        </a>
+        <div class="card-hero"><img src="biomotion.png" alt="BioMotion Lab"></div>
+      </div>
+    </div>
+
+    <!-- 6. SARIT (afternoon lavender) -->
+    <div class="card card-wide scene-sarit">
+      <div class="card-scene">
+        <div class="card-scene-bg"></div>
+        <a class="card-link-overlay" href="SARIT_Object_Detection_Report.pdf" target="_blank" aria-label="View SARIT report"></a>
+        <a href="SARIT_Object_Detection_Report.pdf" target="_blank" class="card-toast">
+          <div class="toast-icon">⌖</div>
+          <div class="toast-text">
+            <div class="toast-title">Wrote the object-detection software for an EV research vehicle</div>
+            <div class="toast-cta">View the report ↗</div>
+          </div>
+        </a>
+        <div class="card-hero"><img src="sarit_cover.png" alt="SARIT Object Detection Report"></div>
+      </div>
+    </div>
+
+    <!-- 5. THIS PORTFOLIO (sunset) -->
+    <div class="card card-wide scene-portfolio">
+      <div class="card-scene">
+        <div class="card-scene-bg"></div>
+        <a class="card-link-overlay" href="#top" aria-label="This portfolio" onclick="document.getElementById('carouselClose').click()"></a>
+        <a href="#top" class="card-toast" onclick="document.getElementById('carouselClose').click()">
+          <div class="toast-icon">✦</div>
+          <div class="toast-text">
+            <div class="toast-title">A little portfolio whose sky shifts as you scroll</div>
+            <div class="toast-cta">You're on it right now ↗</div>
+          </div>
+        </a>
+        <div class="card-hero"><img src="portfolio_self.png" alt="This portfolio"></div>
+      </div>
+    </div>
+
+    <!-- 9. AVATAR (twilight) -->
+    <div class="card card-portrait scene-avatar card-twilight-scene">
+      <div class="card-scene">
+        <div class="card-scene-bg"></div>
+        <a class="card-link-overlay" href="https://apps.apple.com/app/id6479072498" target="_blank" aria-label="Open Avatar on the App Store"></a>
+        <a href="https://apps.apple.com/app/id6479072498" target="_blank" class="card-toast">
+          <div class="toast-icon">A</div>
+          <div class="toast-text">
+            <div class="toast-title">An iOS app I built by myself one summer</div>
+            <div class="toast-cta">Open Avatar on the App Store ↗</div>
+          </div>
+        </a>
+        <div class="card-hero" style="width: 52%; height: 70%; background: #000;"><img src="avatar_screenshot.png" alt="Avatar iOS app"></div>
+      </div>
+    </div>
+
+    <!-- 7. CONTACT (night) — matched to Natalie's contact overlay -->
+    <div class="card card-twilight">
+      <div class="card-body">
+        <h3 class="card-headline">Send me a note.</h3>
+        <p class="card-section-text">Toronto-based, graduating April 2026. Best way to reach me is email — I read everything. Especially down to talk if you're hiring a new grad who can ship across biology and software, or you just want to compare notes on CRISPR, iOS, eye-tracking data, or whatever you're building.</p>
+
+        <div class="contact-rows">
+          <a class="contact-row" href="mailto:utamavantika@gmail.com">
+            <span class="contact-label">Email</span>
+            <span class="contact-value">utamavantika@gmail.com</span>
+          </a>
+          <a class="contact-row" href="https://linkedin.com/in/avanu16" target="_blank">
+            <span class="contact-label">LinkedIn</span>
+            <span class="contact-value">/avanu16</span>
+          </a>
+          <a class="contact-row" href="https://github.com/aviu16" target="_blank">
+            <span class="contact-label">GitHub</span>
+            <span class="contact-value">@aviu16</span>
+          </a>
+          <a class="contact-row" href="https://www.instagram.com/avantikaaaa.u/" target="_blank">
+            <span class="contact-label">Instagram</span>
+            <span class="contact-value">@avantikaaaa.u</span>
+          </a>
+        </div>
+
+        <a class="contact-cv" href="#" target="_blank">Download CV <span class="arrow">↗</span></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = Math.random() * 4 + 's';
+    starsEl.appendChild(s);
+  }
+
+  // === SHOOTING STAR — fires at random intervals (30–90s), comet streaks
+  // diagonally across the sky leaving a fading trail + tiny twinkle residue.
+  const shootingStarsEl = document.getElementById('shootingStars');
+  function fireShootingStar() {
+    const star = document.createElement('div');
+    star.className = 'shooting-star';
+    // Pick a random launch point in the upper-left quadrant of the viewport
+    const startX = Math.random() * 40; // 0–40% from left
+    const startY = Math.random() * 25 + 5; // 5–30% from top
+    star.style.left = startX + '%';
+    star.style.top = startY + '%';
+    shootingStarsEl.appendChild(star);
+    // Force a layout flush so the initial state is registered before the
+     // animation class is applied (without this, browsers occasionally skip
+     // straight to the end state).
+    void star.offsetWidth;
+    star.classList.add('firing');
+    // Drop a lingering twinkle at the comet's landing point
+    setTimeout(() => {
+      const residue = document.createElement('div');
+      residue.className = 'star-residue';
+      // Match the comet's end position (translated 1100px right, 440px down)
+      residue.style.left = `calc(${startX}% + 1100px)`;
+      residue.style.top = `calc(${startY}% + 440px)`;
+      shootingStarsEl.appendChild(residue);
+      setTimeout(() => residue.remove(), 6000);
+    }, 2300);
+    // Clean up the comet itself once the 2.6s animation finishes
+    setTimeout(() => star.remove(), 2800);
+  }
+  function scheduleNextShootingStar() {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const delay = isDark
+      ? 8000 + Math.random() * 15000   // 8–23s in dark
+      : 15000 + Math.random() * 25000; // 15–40s in light
+    setTimeout(() => { fireShootingStar(); scheduleNextShootingStar(); }, delay);
+  }
+  // First comet fires 1.5–3s after page load so it's visible immediately
+  setTimeout(fireShootingStar, 1500 + Math.random() * 1500);
+  scheduleNextShootingStar();
+
+  // === BIRD FLOCK — V-formation crosses the sky every ~2 minutes.
+  // 7 birds arranged in a chevron, all flap together, whole flock drifts L→R.
+  const birdFlockEl = document.getElementById('birdFlock');
+  const birdPositions = [
+    { x: 0,   y: 0   }, // leader
+    { x: 14,  y: 8   }, { x: 14,  y: -8 },
+    { x: 28,  y: 16  }, { x: 28,  y: -16 },
+    { x: 42,  y: 24  }, { x: 42,  y: -24 },
+  ];
+  birdPositions.forEach((pos, i) => {
+    const b = document.createElement('div');
+    b.className = 'bird';
+    b.style.left = pos.x + 'px';
+    b.style.top = pos.y + 'px';
+    b.style.animationDelay = (i * 0.05) + 's'; // slight wing-flap offset per bird
+    b.innerHTML = '<svg viewBox="0 0 18 10"><path d="M 1 7 Q 5 1 9 5 Q 13 1 17 7"/></svg>';
+    birdFlockEl.appendChild(b);
+  });
+  function flyFlock() {
+    // Reset position before each flight (vary altitude slightly each time)
+    birdFlockEl.style.top = (12 + Math.random() * 18) + 'vh';
+    birdFlockEl.classList.remove('flying');
+    void birdFlockEl.offsetWidth; // force reflow so the animation restarts cleanly
+    birdFlockEl.classList.add('flying');
+  }
+  function scheduleNextFlock() {
+    const delay = 90000 + Math.random() * 60000; // 90–150s between flocks
+    setTimeout(() => { flyFlock(); scheduleNextFlock(); }, delay);
+  }
+  setTimeout(flyFlock, 25000 + Math.random() * 15000); // first flock 25–40s in
+  scheduleNextFlock();
+
+  // === PET DUO — real game-physics jumps ===
+  // Position is driven each animation frame by parabolic arc math.
+  // Jumps go UP → peak → DOWN, not glide-between-points. Anticipation
+  // (squash) → launch (stretch) → in-air (no scale) → landing (squash).
+  const petDuoEl = document.getElementById('petDuo');
+  const petFlowerHeadEl = document.getElementById('petFlowerHead');
+
+  let petX = 0, petY = -100;
+  let petHappy = false, petEntryDone = false;
+  function applyPetPos() {
+    if (!petDuoEl) return;
+    petDuoEl.style.left = petX + 'px';
+    petDuoEl.style.top  = petY + 'px';
+  }
+  function setFacing(dir) {
+    petDuoEl?.setAttribute('data-facing', dir < 0 ? 'left' : 'right');
+  }
+
+  // (legacy arcJump removed; everything uses hopTo() defined below)
+
+  // (failedJump removed — not used in current flow)
+
+  const PET_SPRITE_H = 54;
+
+  // Compute landing positions. A: sit ON TOP of the letter. i: sit RIGHT NEXT
+  // to the letter, vertically CENTERED with it so she reads as "beside" the i.
+  function getRouteCoords() {
+    const aEl = document.getElementById('petTargetA');
+    const iEl = document.getElementById('petTargetI');
+    const groundY = window.innerHeight - PET_SPRITE_H - 10;
+    const cornerX = window.innerWidth - 64;
+    const centerX = window.innerWidth / 2;
+    let aX = window.innerWidth / 2 - 200, iX = window.innerWidth / 2 + 200;
+    let aTopY = 80, iTopY = 80;
+    if (aEl && iEl) {
+      const aR = aEl.getBoundingClientRect();
+      const iR = iEl.getBoundingClientRect();
+      // A: feet at the top of the letter (sits ON TOP of A)
+      aX = aR.left + aR.width / 2;
+      aTopY = aR.top - PET_SPRITE_H;
+      // i: to the RIGHT of the end "i" with a clear gap, vertically centered
+      iX = iR.right + 38;
+      iTopY = iR.top + (iR.height - PET_SPRITE_H) / 2;
+    }
+    return { aX, iX, aTopY, iTopY, groundY, cornerX, centerX };
+  }
+
+  // PHASE A — entry runs as a single CSS keyframe (browser-guaranteed completion).
+  // We measure letter positions, write them as CSS custom properties on the
+  // .pet-duo, then add `.entering` class. The keyframe animates through:
+  //   off-screen top → A → pause → end "i" → pause → bottom-center.
+  // Simple JS-driven entry. Two timed transitions: drop onto A, then hop to i.
+  // No CSS keyframes, no rAF. Each transition is just setting style.top/left,
+  // the CSS transition (0.85s) animates it smoothly. The hop-arc class
+  // adds a UP-DOWN bob on the children at the same time = visible jump.
+  function hopTo(x, y) {
+    return new Promise((resolve) => {
+      if (x !== petX) setFacing(x > petX ? 1 : -1);
+      petDuoEl.classList.add('hopping');
+      petX = x; petY = y;
+      petDuoEl.style.left = x + 'px';
+      petDuoEl.style.top  = y + 'px';
+      setTimeout(() => {
+        petDuoEl.classList.remove('hopping');
+        resolve();
+      }, 900);
+    });
+  }
+  const dlog = (msg) => console.log(msg);
+
+  async function runPetEntry() {
+    if (!petDuoEl) { dlog('ERROR: petDuoEl is null'); return; }
+    dlog('petDuo OK, classes=' + petDuoEl.className);
+    try {
+      await new Promise(r => setTimeout(r, 400));
+      let c = getRouteCoords();
+      dlog(`coords A=(${Math.round(c.aX)},${Math.round(c.aTopY)}) i=(${Math.round(c.iX)},${Math.round(c.iTopY)})`);
+
+      petX = window.innerWidth / 2; petY = -120;
+      petDuoEl.style.left = petX + 'px';
+      petDuoEl.style.top  = petY + 'px';
+      await new Promise(r => setTimeout(r, 60));
+
+      dlog('hop 1: → A');
+      await hopTo(c.aX, c.aTopY);
+      await new Promise(r => setTimeout(r, 250));
+
+      c = getRouteCoords();
+      dlog(`hop 2: → beside i`);
+      await hopTo(c.iX, c.iTopY);
+      await new Promise(r => setTimeout(r, 300));
+
+      // Final entry hop: drop down to the bottom-center of the viewport
+      c = getRouteCoords();
+      dlog(`hop 3: → bottom`);
+      await hopTo(c.centerX, c.groundY);
+
+      // At the bottom she JITTERS — frantically trying to jump but can't,
+      // visual cue that the user should scroll.
+      petPhase = 'perched';
+      petDuoEl.classList.add('jittering');
+    } catch (err) {
+      dlog('ERROR: ' + err.message);
+      console.error('[pet] entry error:', err);
+      petPhase = 'perched';
+    }
+  }
+
+  // PHASE B — first scroll down: stop jittering, hop to the bottom-right corner.
+  async function runPetToCorner() {
+    if (!petDuoEl || petPhase !== 'perched') return;
+    petPhase = 'transitioning';
+    petDuoEl.classList.remove('jittering');
+    const c = getRouteCoords();
+    await hopTo(c.cornerX, c.groundY);
+    petPhase = 'corner';
+    petDuoEl.classList.add('happy'); // calm idle bob at corner
+  }
+
+  // PHASE C — scroll back to top: reverse route, then vanish + respawn
+  async function runPetReverse() {
+    if (!petDuoEl || petPhase !== 'corner') return;
+    petPhase = 'reversing';
+    petDuoEl.classList.remove('happy');
+    let c = getRouteCoords();
+
+    // 1. Big arc UP from corner back to the END "i"
+    await hopTo(c.iX, c.iTopY);
+    await new Promise(r => setTimeout(r, 200));
+
+    // 2. Hop back left to "A" of Avantika
+    c = getRouteCoords();
+    await hopTo(c.aX, c.aTopY);
+    await new Promise(r => setTimeout(r, 200));
+
+    // 3. Big leap UP and off-screen at center-top
+    await hopTo(window.innerWidth / 2, -120);
+
+    // 4. Vanish for a beat
+    petDuoEl.style.opacity = '0';
+    await new Promise(r => setTimeout(r, 900));
+
+    // 5. Respawn from center-top
+    petX = window.innerWidth / 2;
+    petY = -120;
+    applyPetPos();
+    petDuoEl.style.opacity = '1';
+    petPhase = 'idle';
+    runPetEntry();
+  }
+
+  // Phase state — 'idle' | 'perched' (on i) | 'transitioning' | 'corner' | 'reversing'
+  let petPhase = 'idle';
+
+  // (Stuck-loop removed — character now perches calmly on the "i" until scroll.)
+
+  // No-op: replaced by reverse-route behavior triggered on scroll-to-top.
+  async function makePetHappy() { /* deprecated */ }
+
+  // Sunflower head tracking — still follows the sun position from the palette
+  function updatePetFlowerHead() {
+    if (!petFlowerHeadEl || !petDuoEl) return;
+    // Get current sun position in viewport space
+    const sunTopPct = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sun-top')) || 50;
+    const sunX = window.innerWidth / 2;
+    const sunY = window.innerHeight * (sunTopPct / 100);
+    const rect = petDuoEl.getBoundingClientRect();
+    const flowerX = rect.left + rect.width * 0.78; // pet-flower is the right SVG
+    const flowerY = rect.top + rect.height * 0.30;
+    const dx = sunX - flowerX;
+    const dy = sunY - flowerY;
+    const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+    const clamped = Math.max(-30, Math.min(30, angle));
+    petFlowerHeadEl.style.setProperty('--head-tilt', clamped + 'deg');
+  }
+
+  // Mood state (drooping at sunset, sleeping in dark mode) — same logic
+  // as the old sunflower but applied to .pet-duo.
+  function updatePetMood() {
+    if (!petDuoEl) return;
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      petDuoEl.classList.add('sleeping');
+      petDuoEl.classList.remove('drooping');
+      return;
+    }
+    petDuoEl.classList.remove('sleeping');
+    const max = (document.documentElement.scrollHeight || 1) - window.innerHeight;
+    const t = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    petDuoEl.classList.toggle('drooping', t > 0.75);
+  }
+  // Scroll handler — drives the phase transitions.
+  //   perched  → first scroll down  → corner
+  //   corner   → scroll back near top → reverse + respawn
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (petPhase === 'perched' && y > 40) {
+      runPetToCorner();
+    } else if (petPhase === 'corner' && y < 20) {
+      runPetReverse();
+    }
+    updatePetMood();
+    updatePetFlowerHead();
+  }, { passive: true });
+
+  document.getElementById('themeBtn')?.addEventListener('click', () => {
+    setTimeout(() => { updatePetMood(); updatePetFlowerHead(); }, 20);
+  });
+  // Reposition on resize so the perch / corner anchor stays put
+  window.addEventListener('resize', () => {
+    if (petPhase === 'idle') return;
+    const c = getRouteCoords();
+    if (petPhase === 'perched') { petX = c.iX; petY = c.iTopY; applyPetPos(); }
+    else if (petPhase === 'corner') { petX = c.cornerX; petY = c.groundY; applyPetPos(); }
+  });
+  // Click pet → playful sparkle (small life signal)
+  petDuoEl?.addEventListener('click', () => {
+    petDuoEl.classList.remove('celebrating');
+    void petDuoEl.offsetWidth;
+    petDuoEl.classList.add('celebrating');
+    setTimeout(() => petDuoEl.classList.remove('celebrating'), 900);
+  });
+
+  // Kick off the entry sequence after a brief settle delay
+  setTimeout(() => {
+    runPetEntry();
+    updatePetMood();
+    updatePetFlowerHead();
+  }, 500);
+
+  // === OLD SUNFLOWER (deactivated, kept so the references below don't error) ===
+  // Stubbed-out version of the old pet sunflower JS — does nothing now.
+  function _legacyNoOp() {}
+  // === PET SUNFLOWER — flower head rotates to face the cursor like a real
+  // sunflower tracks the sun. Mood changes with time of day (= scroll progress).
+  const petEl = document.getElementById('petSunflower');
+  const sunHeadEl = document.getElementById('sunHead');
+  function updateSunflowerFace() {
+    if (!petEl || !sunHeadEl) return;
+    const rect = petEl.getBoundingClientRect();
+    // Head pivot point — bottom-center of the head (where it joins the stem)
+    const pivotX = rect.left + rect.width / 2;
+    const pivotY = rect.top + 16; // approx position of head center
+    // Track the LAST mouse position; if none yet, look up + slightly left
+    const mx = (window._petMouseX != null) ? window._petMouseX : pivotX - 80;
+    const my = (window._petMouseY != null) ? window._petMouseY : pivotY - 200;
+    // Compute angle, clamp so the head only tilts ±35° (sunflowers don't spin)
+    const dx = mx - pivotX;
+    const dy = my - pivotY;
+    const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+    const clamped = Math.max(-35, Math.min(35, angle));
+    sunHeadEl.style.setProperty('--head-tilt', clamped + 'deg');
+  }
+  window.addEventListener('mousemove', (e) => {
+    window._petMouseX = e.clientX;
+    window._petMouseY = e.clientY;
+    updateSunflowerFace();
+    // Move the firefly toward the cursor (dark mode only)
+    if (document.body.getAttribute('data-theme') === 'dark') {
+      const fly = document.getElementById('firefly');
+      if (fly) {
+        fly.style.left = (e.clientX + 24) + 'px';
+        fly.style.top  = (e.clientY - 18) + 'px';
+      }
+    }
+  }, { passive: true });
+  // Click sunflower → bounce + cute reaction
+  petEl?.addEventListener('click', () => {
+    petEl.classList.remove('bouncing');
+    void petEl.offsetWidth;
+    petEl.classList.add('bouncing');
+    setTimeout(() => petEl.classList.remove('bouncing'), 600);
+  });
+
+  // Update mood (drooping at golden hour, sleeping at night) on scroll + theme.
+  function updateSunflowerMood() {
+    if (!petEl) return;
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      petEl.classList.add('sleeping');
+      petEl.classList.remove('drooping');
+      return;
+    }
+    petEl.classList.remove('sleeping');
+    // Scroll progress 0→1 from top to bottom of page
+    const max = (document.documentElement.scrollHeight || 1) - window.innerHeight;
+    const t = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+    // Last 25% of page = golden hour / sunset = drooping
+    petEl.classList.toggle('drooping', t > 0.75);
+  }
+  window.addEventListener('scroll', updateSunflowerMood, { passive: true });
+  // Also run on theme toggle (rebind by hooking the existing themeBtn handler)
+  document.getElementById('themeBtn')?.addEventListener('click', () => {
+    setTimeout(updateSunflowerMood, 20);
+  });
+  updateSunflowerMood();
+  updateSunflowerFace();
+
+  const palettes = [
+    // 0 = dawn (cool blue), 1 = midday (open sky), 2 = golden hour (warm), 3 = sunset (pink)
+    { sky: [[168, 213, 240], [200, 226, 242], [232, 242, 250]], sunTop: 78, sunCore: [255, 250, 230, 0.85], sunGlow: [255, 220, 180, 0.35], cloud: [255, 255, 255, 0.97], cloudEdge: [255, 255, 255], cloudShadow: [165, 178, 200, 0.55], horizonFar: [125, 152, 182, 0.55], horizonNear: [95, 125, 160, 0.7], grassBack: [69, 110, 60, 1], grassFront: [110, 165, 80, 1], grassBlade: [44, 80, 36, 0.65], daisyPetal: [255, 255, 255, 1], daisyCenter: [244, 183, 62, 1], flowerYellow: [242, 201, 76, 1], flowerPink: [232, 155, 181, 1], flowerBlue: [143, 181, 220, 1], stars: 0 },
+    { sky: [[200, 224, 240], [218, 232, 244], [240, 246, 250]], sunTop: 35, sunCore: [255, 248, 225, 0.9], sunGlow: [255, 215, 175, 0.35], cloud: [255, 255, 255, 0.97], cloudEdge: [255, 255, 255], cloudShadow: [185, 198, 218, 0.55], horizonFar: [140, 168, 195, 0.55], horizonNear: [110, 140, 175, 0.7], grassBack: [80, 130, 65, 1], grassFront: [122, 178, 88, 1], grassBlade: [52, 95, 42, 0.65], daisyPetal: [255, 255, 255, 1], daisyCenter: [244, 183, 62, 1], flowerYellow: [242, 201, 76, 1], flowerPink: [232, 155, 181, 1], flowerBlue: [143, 181, 220, 1], stars: 0 },
+    { sky: [[245, 230, 215], [250, 235, 220], [253, 240, 228]], sunTop: 55, sunCore: [255, 230, 200, 0.9], sunGlow: [250, 195, 165, 0.35], cloud: [255, 250, 240, 0.95], cloudEdge: [255, 250, 240], cloudShadow: [218, 195, 175, 0.55], horizonFar: [196, 168, 158, 0.55], horizonNear: [165, 135, 130, 0.7], grassBack: [115, 130, 70, 1], grassFront: [158, 175, 95, 1], grassBlade: [85, 95, 45, 0.65], daisyPetal: [255, 248, 235, 1], daisyCenter: [240, 165, 60, 1], flowerYellow: [240, 180, 80, 1], flowerPink: [235, 145, 165, 1], flowerBlue: [165, 175, 210, 1], stars: 0 },
+    { sky: [[245, 195, 200], [240, 175, 185], [218, 145, 170]], sunTop: 78, sunCore: [255, 210, 190, 0.85], sunGlow: [240, 160, 150, 0.35], cloud: [255, 230, 230, 0.92], cloudEdge: [255, 240, 240], cloudShadow: [200, 160, 175, 0.6], horizonFar: [180, 130, 155, 0.6], horizonNear: [145, 95, 130, 0.72], grassBack: [105, 95, 75, 1], grassFront: [140, 130, 95, 1], grassBlade: [82, 70, 55, 0.65], daisyPetal: [255, 235, 225, 1], daisyCenter: [230, 145, 70, 1], flowerYellow: [235, 165, 95, 1], flowerPink: [225, 130, 155, 1], flowerBlue: [175, 165, 200, 1], stars: 0.2 },
+  ];
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const lerpArr = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
+  const rgb = a => `rgb(${a.slice(0,3).map(Math.round).join(',')})`;
+  const rgba = a => `rgba(${Math.round(a[0])},${Math.round(a[1])},${Math.round(a[2])},${a[3]})`;
+
+  function getPaletteAt(t) {
+    if (t <= 0) return palettes[0];
+    if (t >= 1) return palettes[palettes.length - 1];
+    const segs = palettes.length - 1;
+    const segT = t * segs;
+    const i = Math.floor(segT);
+    const k = segT - i;
+    const a = palettes[i], b = palettes[i + 1];
+    // Helper: lerp a 4-element [r,g,b,a] color
+    const lerpRGBA = (x, y) => [...lerpArr(x.slice(0,3), y.slice(0,3), k), lerp(x[3], y[3], k)];
+    return {
+      sky: a.sky.map((stop, idx) => lerpArr(stop, b.sky[idx], k)),
+      sunTop: lerp(a.sunTop, b.sunTop, k),
+      sunCore: lerpRGBA(a.sunCore, b.sunCore),
+      sunGlow: lerpRGBA(a.sunGlow, b.sunGlow),
+      cloud: lerpRGBA(a.cloud, b.cloud),
+      cloudEdge: lerpArr(a.cloudEdge, b.cloudEdge, k),
+      cloudShadow: lerpRGBA(a.cloudShadow, b.cloudShadow),
+      horizonFar: lerpRGBA(a.horizonFar, b.horizonFar),
+      horizonNear: lerpRGBA(a.horizonNear, b.horizonNear),
+      grassBack: lerpRGBA(a.grassBack, b.grassBack),
+      grassFront: lerpRGBA(a.grassFront, b.grassFront),
+      grassBlade: lerpRGBA(a.grassBlade, b.grassBlade),
+      daisyPetal: lerpRGBA(a.daisyPetal, b.daisyPetal),
+      daisyCenter: lerpRGBA(a.daisyCenter, b.daisyCenter),
+      flowerYellow: lerpRGBA(a.flowerYellow, b.flowerYellow),
+      flowerPink: lerpRGBA(a.flowerPink, b.flowerPink),
+      flowerBlue: lerpRGBA(a.flowerBlue, b.flowerBlue),
+      stars: lerp(a.stars, b.stars, k),
+    };
+  }
+
+  function applyPalette(p) {
+    const s = document.documentElement.style;
+    s.setProperty('--bg-top', rgb(p.sky[0]));
+    s.setProperty('--bg-mid', rgb(p.sky[1]));
+    s.setProperty('--bg-bot', rgb(p.sky[2]));
+    s.setProperty('--sun-top', p.sunTop + '%');
+    s.setProperty('--sun-core', rgba(p.sunCore));
+    s.setProperty('--sun-glow', rgba(p.sunGlow));
+    s.setProperty('--cloud', rgba(p.cloud));
+    s.setProperty('--cloud-edge', rgb(p.cloudEdge));
+    s.setProperty('--cloud-shadow', rgba(p.cloudShadow));
+    s.setProperty('--horizon-far', rgba(p.horizonFar));
+    s.setProperty('--horizon-near', rgba(p.horizonNear));
+    s.setProperty('--grass-back', rgba(p.grassBack));
+    s.setProperty('--grass-front', rgba(p.grassFront));
+    s.setProperty('--grass-blade', rgba(p.grassBlade));
+    s.setProperty('--daisy-petal', rgba(p.daisyPetal));
+    s.setProperty('--daisy-center', rgba(p.daisyCenter));
+    s.setProperty('--flower-yellow', rgba(p.flowerYellow));
+    s.setProperty('--flower-pink', rgba(p.flowerPink));
+    s.setProperty('--flower-blue', rgba(p.flowerBlue));
+    s.setProperty('--stars', p.stars);
+  }
+
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const contactEl = document.getElementById('contact');
+      const skyEnd = contactEl.offsetTop;
+      const t = Math.min(window.scrollY / Math.max(skyEnd - window.innerHeight, 1), 1);
+      applyPalette(getPaletteAt(t));
+      ticking = false;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  applyPalette(getPaletteAt(0));
+
+  // Populate small drifting stars for the carousel navy overlay
+  const csEl = document.getElementById('carouselStars');
+  if (csEl) {
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      s.className = 'cs';
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = Math.random() * 100 + '%';
+      s.style.animationDelay = Math.random() * 4 + 's';
+      s.style.opacity = (0.3 + Math.random() * 0.7).toFixed(2);
+      csEl.appendChild(s);
+    }
+  }
+
+  const carousel = document.getElementById('carousel');
+  const carouselBtn = document.getElementById('carouselBtn');
+  const carouselHint = document.getElementById('carouselHint');
+  function openCarousel() {
+    carousel.classList.add('open');
+    carouselHint.classList.add('show');
+    document.body.classList.add('carousel-mode');
+    carousel.scrollLeft = 0;
+    requestAnimationFrame(() => applyCarouselSky(true));
+  }
+  function closeCarousel() {
+    carousel.classList.remove('open');
+    carouselHint.classList.remove('show');
+    document.body.classList.remove('carousel-mode');
+  }
+  // Clicking the Carousel pill while already in carousel mode is a no-op —
+  // use the Scroll pill (or Escape) to return to scroll mode.
+  carouselBtn.addEventListener('click', () => {
+    if (!carousel.classList.contains('open')) openCarousel();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCarousel(); });
+
+  // Scroll-mode button = the default scrolling homepage. Closing the carousel
+  // returns the user to that mode. If we're already there, it's a no-op.
+  const scrollModeBtn = document.getElementById('scrollModeBtn');
+  scrollModeBtn?.addEventListener('click', () => {
+    if (carousel.classList.contains('open')) closeCarousel();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Light / Dark mode toggle — persists choice in localStorage
+  const themeBtn = document.getElementById('themeBtn');
+  const applyTheme = (mode) => {
+    if (mode === 'dark') document.body.setAttribute('data-theme', 'dark');
+    else document.body.removeAttribute('data-theme');
+  };
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme) applyTheme(savedTheme);
+  themeBtn?.addEventListener('click', () => {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('theme', next);
+    // If the carousel is open, refresh its sky so the new theme takes effect.
+    if (carousel.classList.contains('open')) applyCarouselSky(true);
+  });
+
+  // === SCROLL MODE NAV — anchor links to page sections, active state by scroll position ===
+  const scrollNavLinks = document.querySelectorAll('.nav-links.nav-scroll a[data-section]');
+  const scrollSections = Array.from(scrollNavLinks)
+    .map((l) => document.getElementById(l.getAttribute('data-section')))
+    .filter(Boolean);
+  const setActiveScrollNav = (id) => {
+    scrollNavLinks.forEach((l) => {
+      l.classList.toggle('is-active', l.getAttribute('data-section') === id);
+    });
+  };
+  function updateScrollActive() {
+    const y = window.scrollY + window.innerHeight * 0.35;
+    let activeId = scrollSections[0]?.id;
+    for (const sec of scrollSections) {
+      if (sec.offsetTop <= y) activeId = sec.id;
+    }
+    if (activeId) setActiveScrollNav(activeId);
+  }
+  window.addEventListener('scroll', updateScrollActive, { passive: true });
+  updateScrollActive();
+  // Smooth-scroll on anchor click (the browser does this with scroll-behavior: smooth, but force it for safety)
+  scrollNavLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const id = link.getAttribute('data-section');
+      const sec = document.getElementById(id);
+      if (!sec) return;
+      e.preventDefault();
+      window.scrollTo({ top: sec.offsetTop - 70, behavior: 'smooth' });
+      setActiveScrollNav(id);
+    });
+  });
+
+  // === CAROUSEL MODE NAV — links scroll the carousel to the matching card ===
+  const navLinks = document.querySelectorAll('.nav-links.nav-carousel a[data-card]');
+  const setActiveNav = (idx) => {
+    navLinks.forEach((l) => {
+      l.classList.toggle('is-active', parseInt(l.getAttribute('data-card'), 10) === idx);
+    });
+  };
+
+  // Smooth-scroll the carousel that bypasses scroll-snap during the animation
+  // (scroll-snap-type: x mandatory otherwise hijacks any smooth scroll).
+  let smoothRAF = null;
+  function smoothScrollCarouselTo(left, durationMs = 700) {
+    if (smoothRAF) cancelAnimationFrame(smoothRAF);
+    const startLeft = carousel.scrollLeft;
+    const dist = left - startLeft;
+    if (Math.abs(dist) < 1) return;
+    const startT = performance.now();
+    // Temporarily disable snap so intermediate positions render
+    carousel.style.scrollSnapType = 'none';
+    // ease-out-cubic — fast start, gentle finish (matches Natalie's feel)
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    const step = (now) => {
+      const t = Math.min((now - startT) / durationMs, 1);
+      carousel.scrollLeft = startLeft + dist * ease(t);
+      if (t < 1) {
+        smoothRAF = requestAnimationFrame(step);
+      } else {
+        smoothRAF = null;
+        // Restore snap on the next frame so it doesn't yank the position
+        requestAnimationFrame(() => { carousel.style.scrollSnapType = ''; });
+      }
+    };
+    smoothRAF = requestAnimationFrame(step);
+  }
+
+  navLinks.forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const idx = parseInt(link.getAttribute('data-card'), 10);
+      const cards = carousel.querySelectorAll('.card');
+      if (!cards[idx]) return;
+      const wasClosed = !carousel.classList.contains('open');
+      if (wasClosed) openCarousel();
+      const go = () => {
+        const target = cards[idx];
+        const left = target.offsetLeft - (carousel.clientWidth - target.offsetWidth) / 2;
+        if (wasClosed) {
+          // Just-opened — jump straight there so we don't animate from 0
+          carousel.scrollLeft = left;
+        } else {
+          smoothScrollCarouselTo(left, 750);
+        }
+      };
+      if (wasClosed) setTimeout(go, 120);
+      else go();
+      setActiveNav(idx);
+    });
+  });
+  // Default active = About (card 0), like Natalie
+  setActiveNav(0);
+  // Update active nav as you scroll the carousel
+  carousel.addEventListener('scroll', () => {
+    const cards = Array.from(carousel.querySelectorAll('.card'));
+    const center = carousel.scrollLeft + carousel.clientWidth / 2;
+    let bestIdx = 0, bestDist = Infinity;
+    cards.forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const d = Math.abs(cardCenter - center);
+      if (d < bestDist) { bestDist = d; bestIdx = i; }
+    });
+    setActiveNav(bestIdx);
+  }, { passive: true });
+  // Vertical wheel → horizontal scroll. Native scrollBy uses the browser's
+  // built-in scroll smoothing/momentum so it doesn't fight scroll-snap.
+  // (Trackpad horizontal-swipe also works natively in parallel.)
+  carousel.addEventListener('wheel', (e) => {
+    if (e.deltaY === 0) return;
+    // If wheel is inside a scrollable .card-body that hasn't yet hit its
+    // edge in the scroll direction, let the inner element scroll naturally.
+    const inner = e.target.closest('.card-body');
+    if (inner) {
+      const atTop = inner.scrollTop <= 0;
+      const atBottom = inner.scrollTop + inner.clientHeight >= inner.scrollHeight - 1;
+      const goingDown = e.deltaY > 0;
+      const canScrollVertically = inner.scrollHeight > inner.clientHeight;
+      if (canScrollVertically && ((goingDown && !atBottom) || (!goingDown && !atTop))) {
+        return;
+      }
+    }
+    e.preventDefault();
+    carousel.scrollBy({ left: e.deltaY, behavior: 'auto' });
+  }, { passive: false });
+
+  // Sky-themed overlay that shifts sunrise → sunset as you swipe the carousel.
+  // Uses the same 4 palettes the page uses, but indexed by carousel scrollLeft.
+  // In dark mode the carousel sky is replaced with a fixed deep-navy gradient
+  // so only the BACKGROUND changes — the cards keep their own (mustard, scene,
+  // twilight) palettes.
+  // Throttled palette state — only repaint the sky when the position has
+  // shifted by ≥1% of the scrollable range. Repainting a viewport-sized
+  // background gradient on every frame is the main carousel-scroll jank.
+  let _lastSkyT = -1;
+  function applyCarouselSky(force) {
+    if (document.body.getAttribute('data-theme') === 'dark') {
+      if (!force && _lastSkyT === -2) return;
+      const sky = 'linear-gradient(180deg, #0E1422 0%, #131A2C 50%, #18213A 100%)';
+      carousel.style.setProperty('--c-bg', sky);
+      carousel.style.background = sky;
+      carousel.classList.add('is-twilight');
+      _lastSkyT = -2;
+      return;
+    }
+    const max = carousel.scrollWidth - carousel.clientWidth;
+    const t = max > 0 ? Math.min(carousel.scrollLeft / max, 1) : 0;
+    // More aggressive throttle: only repaint sky when t shifts >= 4% (was 1%).
+    // Repainting a viewport-sized gradient is what causes scroll jank.
+    if (!force && Math.abs(t - _lastSkyT) < 0.04) return;
+    _lastSkyT = t;
+    const p = getPaletteAt(t);
+    const sky = `linear-gradient(180deg, rgb(${p.sky[0].map(Math.round).join(',')}) 0%, rgb(${p.sky[1].map(Math.round).join(',')}) 50%, rgb(${p.sky[2].map(Math.round).join(',')}) 100%)`;
+    carousel.style.setProperty('--c-bg', sky);
+    carousel.style.background = sky;
+    carousel.style.setProperty('--c-cloud', rgba(p.cloud));
+    carousel.style.setProperty('--c-cloud-edge', rgb(p.cloudEdge));
+    carousel.style.setProperty('--c-sun-top', p.sunTop + '%');
+    carousel.style.setProperty('--c-sun-core', rgba(p.sunCore));
+    carousel.style.setProperty('--c-sun-glow', rgba(p.sunGlow));
+    carousel.classList.toggle('is-twilight', t > 0.72);
+  }
+  // Pause cloud + wisp drift animations during active scroll to free up GPU.
+  // Resume 180ms after scroll stops so they continue drifting when idle.
+  let cTicking = false, _scrollStop;
+  carousel.addEventListener('scroll', () => {
+    carousel.classList.add('is-scrolling');
+    clearTimeout(_scrollStop);
+    _scrollStop = setTimeout(() => carousel.classList.remove('is-scrolling'), 180);
+    if (cTicking) return;
+    cTicking = true;
+    requestAnimationFrame(() => { applyCarouselSky(); cTicking = false; });
+  }, { passive: true });
+</script>
+
+</body>
+</html>

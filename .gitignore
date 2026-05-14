@@ -1,0 +1,27 @@
+# macOS junk
+.DS_Store
+
+# Editor / tooling
+.claude/
+
+# Backup files
+*.bak
+index.html.bak
+
+# Debug/test pages
+pet-test.html
+
+# Source files not used by the live site
+SARIT_Fleet_Presentation.pdf
+SARIT_Fleet_Presentation.pptx
+*.pptx
+
+# Unused images (not referenced in index.html)
+_full.png
+_now_s.png
+avatar_character.png
+avatar_screenshot2.jpg
+focus.png
+sanofi_lab.jpg
+sarit_fleet_cover.png
+wombo.png
