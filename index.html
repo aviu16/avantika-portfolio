@@ -1432,18 +1432,19 @@
   .carousel-overlay {
     position: fixed; inset: 0; z-index: 200;
     background: var(--c-bg, linear-gradient(180deg, #A8D5F0 0%, #C8E2F2 50%, #E8F2FA 100%));
-    transition: background 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    /* NO background transition — it was causing 25+ overlapping 0.6s gradient
+       animations to stack during a swipe, melting the GPU. Sky updates from
+       JS now snap instantly (throttled in JS to feel smooth anyway). */
+    transition: opacity 0.4s ease;
     display: none;
     align-items: center;
     overflow-x: auto; overflow-y: hidden;
-    /* `proximity` lets you free-scroll with natural trackpad momentum and
-       only nudges to a card when you're close. `mandatory` was forcing a
-       snap on every micro-movement, which felt like jitter on trackpad. */
     scroll-snap-type: x proximity;
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none; -ms-overflow-style: none;
     opacity: 0;
+    contain: paint;
   }
   .carousel-overlay::-webkit-scrollbar { display: none; }
   .carousel-overlay.open { display: flex; opacity: 1; }
@@ -4057,21 +4058,22 @@
       if (!force && _lastSkyT === -2) return;
       const sky = 'linear-gradient(180deg, #0E1422 0%, #131A2C 50%, #18213A 100%)';
       carousel.style.setProperty('--c-bg', sky);
-      carousel.style.background = sky;
       carousel.classList.add('is-twilight');
       _lastSkyT = -2;
       return;
     }
     const max = carousel.scrollWidth - carousel.clientWidth;
     const t = max > 0 ? Math.min(carousel.scrollLeft / max, 1) : 0;
-    // More aggressive throttle: only repaint sky when t shifts >= 4% (was 1%).
-    // Repainting a viewport-sized gradient is what causes scroll jank.
-    if (!force && Math.abs(t - _lastSkyT) < 0.04) return;
+    // Throttle to >=8% jumps — fewer big paints, no visible chunkiness because
+    // the gradient stops are close enough that 8% reads as smooth.
+    if (!force && Math.abs(t - _lastSkyT) < 0.08) return;
     _lastSkyT = t;
     const p = getPaletteAt(t);
     const sky = `linear-gradient(180deg, rgb(${p.sky[0].map(Math.round).join(',')}) 0%, rgb(${p.sky[1].map(Math.round).join(',')}) 50%, rgb(${p.sky[2].map(Math.round).join(',')}) 100%)`;
+    // Set ONLY the CSS var (the .carousel-overlay's `background: var(--c-bg)`
+    // rule picks it up). Was previously setting both --c-bg AND style.background
+    // = two repaints per update.
     carousel.style.setProperty('--c-bg', sky);
-    carousel.style.background = sky;
     carousel.style.setProperty('--c-cloud', rgba(p.cloud));
     carousel.style.setProperty('--c-cloud-edge', rgb(p.cloudEdge));
     carousel.style.setProperty('--c-sun-top', p.sunTop + '%');
