@@ -9,8 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
-
 <style>
   :root {
     --display: 'Funnel Display', -apple-system, sans-serif;
@@ -974,14 +972,18 @@
     letter-spacing: -0.01em;
   }
   body[data-theme="dark"] .skills-items li { color: #E8EBF1; }
-  .skills-items li i {
-    font-size: 19px;
-    width: 22px; text-align: center;
-    color: var(--ink);
-    opacity: 0.78;
+  /* Simple-Icons rendered as a CSS mask so the icon color = the text color
+     (auto-themes light/dark). Each <span class="sk"> sets --si to the icon URL. */
+  .skills-items li .sk {
+    display: inline-block;
+    width: 18px; height: 18px;
     flex-shrink: 0;
+    background-color: currentColor;
+    opacity: 0.72;
+    -webkit-mask: var(--si) center / contain no-repeat;
+    mask: var(--si) center / contain no-repeat;
   }
-  body[data-theme="dark"] .skills-items li i { color: #E8EBF1; opacity: 0.85; }
+  body[data-theme="dark"] .skills-items li .sk { opacity: 0.85; }
   @media (max-width: 880px) {
     .skills-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; padding: 32px 28px; }
   }
@@ -2965,53 +2967,53 @@
       <div class="skills-col">
         <h3 class="skills-cat">Languages</h3>
         <ul class="skills-items">
-          <li><i class="devicon-python-plain"></i>Python</li>
-          <li><i class="devicon-typescript-plain"></i>TypeScript</li>
-          <li><i class="devicon-javascript-plain"></i>JavaScript</li>
-          <li><i class="devicon-swift-plain"></i>Swift</li>
-          <li><i class="devicon-php-plain"></i>PHP</li>
-          <li><i class="devicon-r-plain"></i>R</li>
-          <li><i class="devicon-bash-plain"></i>Bash</li>
-          <li><i class="devicon-mysql-plain"></i>SQL</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/python)"></span>Python</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/typescript)"></span>TypeScript</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/javascript)"></span>JavaScript</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/swift)"></span>Swift</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/php)"></span>PHP</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/r)"></span>R</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/gnubash)"></span>Bash</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/sqlite)"></span>SQL</li>
         </ul>
       </div>
       <div class="skills-col">
         <h3 class="skills-cat">Frameworks</h3>
         <ul class="skills-items">
-          <li><i class="devicon-react-original"></i>React</li>
-          <li><i class="devicon-swift-plain"></i>SwiftUI</li>
-          <li><i class="devicon-electron-original"></i>Electron</li>
-          <li><i class="devicon-flask-original"></i>Flask</li>
-          <li><i class="devicon-fastapi-plain"></i>FastAPI</li>
-          <li><i class="devicon-tailwindcss-original"></i>Tailwind</li>
-          <li><i class="devicon-opencv-plain"></i>OpenCV</li>
-          <li><i class="devicon-openai-original"></i>OpenAI API</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/react)"></span>React</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/swift)"></span>SwiftUI</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/electron)"></span>Electron</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/flask)"></span>Flask</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/fastapi)"></span>FastAPI</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/tailwindcss)"></span>Tailwind</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/opencv)"></span>OpenCV</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/openai)"></span>OpenAI API</li>
         </ul>
       </div>
       <div class="skills-col">
         <h3 class="skills-cat">Data</h3>
         <ul class="skills-items">
-          <li><i class="devicon-postgresql-plain"></i>PostgreSQL</li>
-          <li><i class="devicon-pandas-original"></i>pandas</li>
-          <li><i class="devicon-numpy-original"></i>NumPy</li>
-          <li><i class="devicon-scikitlearn-plain"></i>scikit-learn</li>
-          <li><i class="devicon-apachekafka-original"></i>Airflow</li>
-          <li><i class="devicon-snowflake-original"></i>Snowflake</li>
-          <li><i class="devicon-dbt-plain"></i>dbt</li>
-          <li><i class="devicon-grafana-original"></i>Power BI</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/postgresql)"></span>PostgreSQL</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/pandas)"></span>pandas</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/numpy)"></span>NumPy</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/scikitlearn)"></span>scikit-learn</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/apacheairflow)"></span>Airflow</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/snowflake)"></span>Snowflake</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/dbt)"></span>dbt</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/powerbi)"></span>Power BI</li>
         </ul>
       </div>
       <div class="skills-col">
         <h3 class="skills-cat">Tools</h3>
         <ul class="skills-items">
-          <li><i class="devicon-git-plain"></i>Git</li>
-          <li><i class="devicon-github-original"></i>GitHub Actions</li>
-          <li><i class="devicon-docker-plain"></i>Docker</li>
-          <li><i class="devicon-amazonwebservices-plain-wordmark"></i>AWS</li>
-          <li><i class="devicon-googlecloud-plain"></i>GCP</li>
-          <li><i class="devicon-vscode-plain"></i>VS Code</li>
-          <li><i class="devicon-jira-plain"></i>JIRA</li>
-          <li><i class="devicon-latex-original"></i>LaTeX</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/git)"></span>Git</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/githubactions)"></span>GitHub Actions</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/docker)"></span>Docker</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/amazonwebservices)"></span>AWS</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/googlecloud)"></span>GCP</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/linux)"></span>Linux</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/jira)"></span>JIRA</li>
+          <li><span class="sk" style="--si:url(https://cdn.simpleicons.org/latex)"></span>LaTeX</li>
         </ul>
       </div>
     </div>
@@ -3023,41 +3025,51 @@
   <div class="wrap">
     <div class="section-meta"><span class="num">03.</span><span>work experience</span><span class="line"></span></div>
     <h2>Work <span class="accent">experience.</span></h2>
-    <div class="xp-list">
-      <a class="xp-entry" href="https://www.omega.inc/" target="_blank" rel="noopener">
-        <div class="xp-role">Data Engineer <span class="xp-ext">↗</span></div>
-        <div class="xp-company">OMEGA Labs</div>
-        <div class="xp-dates">2024 — 2026</div>
-        <div class="xp-loc">Toronto, ON · Remote</div>
-        <div class="xp-desc">Reviewed PRs across the data backend (FastAPI, PostgreSQL, SQLAlchemy) and AI agent stack, and shipped a date-navigation feature in the Focus desktop app (Electron, React, TypeScript).</div>
+    <div class="exp-list">
+      <a class="exp-item" href="https://www.omega.inc/" target="_blank" rel="noopener">
+        <div class="exp-year">2024 → 2026</div>
+        <div class="exp-body">
+          <div class="exp-title">OMEGA Labs <span class="role">Data Engineer</span><span class="ext">↗</span></div>
+          <div class="exp-role">AI startup on the Bittensor network.</div>
+          <div class="exp-detail">Reviewed PRs across the data backend (FastAPI, PostgreSQL, SQLAlchemy) and the AI agent stack. Shipped a date-navigation feature in the Focus desktop app (Electron, React, TypeScript).</div>
+        </div>
+        <div class="exp-meta">omega.inc</div>
       </a>
-      <a class="xp-entry" href="https://www.yorku.ca/research/biomotionlab/" target="_blank" rel="noopener">
-        <div class="xp-role">Research Assistant <span class="xp-ext">↗</span></div>
-        <div class="xp-company">BioMotion Lab — York University</div>
-        <div class="xp-dates">2025 — 2026</div>
-        <div class="xp-loc">Toronto, ON</div>
-        <div class="xp-desc">Designed a normalized MySQL schema and PHP backend for the body-image experiment, built Python/R ETL pipelines for thesis data, and rebuilt the lab website on WordPress.</div>
+      <a class="exp-item" href="https://www.yorku.ca/research/biomotionlab/" target="_blank" rel="noopener">
+        <div class="exp-year">2025 → 2026</div>
+        <div class="exp-body">
+          <div class="exp-title">BioMotion Lab <span class="role">Research Assistant</span><span class="ext">↗</span></div>
+          <div class="exp-role">Centre for Vision Research.</div>
+          <div class="exp-detail">Designed a normalized MySQL schema and PHP backend for the body-image experiment. Built Python and R ETL pipelines for thesis data, and rebuilt the lab website on WordPress.</div>
+        </div>
+        <div class="exp-meta">York</div>
       </a>
-      <a class="xp-entry" href="https://www.sanofi.com/" target="_blank" rel="noopener">
-        <div class="xp-role">B92 M&amp;S Co-Op <span class="xp-ext">↗</span></div>
-        <div class="xp-company">Sanofi Pasteur</div>
-        <div class="xp-dates">2024 — 2025</div>
-        <div class="xp-loc">Toronto, ON</div>
-        <div class="xp-desc">Built a Python batch-printing tool and Excel/VBA validation workbook for cGMP compliance, managed lifecycle data for 100+ IPV assets in SAP iShift, and led a formal change-control project.</div>
+      <a class="exp-item" href="https://www.sanofi.com/" target="_blank" rel="noopener">
+        <div class="exp-year">2024 → 2025</div>
+        <div class="exp-body">
+          <div class="exp-title">Sanofi Pasteur <span class="role">B92 M&amp;S Co-Op</span><span class="ext">↗</span></div>
+          <div class="exp-role">cGMP vaccine manufacturing.</div>
+          <div class="exp-detail">Built a Python batch-printing tool and an Excel/VBA validation workbook for compliance. Managed lifecycle data for 100+ IPV assets in SAP iShift, and led a formal change-control project.</div>
+        </div>
+        <div class="exp-meta">Toronto</div>
       </a>
-      <a class="xp-entry" href="SARIT_Object_Detection_Report.pdf" target="_blank">
-        <div class="xp-role">Research Assistant <span class="xp-ext">↗</span></div>
-        <div class="xp-company">Lassonde Engineering — York University</div>
-        <div class="xp-dates">2023 — 2024</div>
-        <div class="xp-loc">Toronto, ON</div>
-        <div class="xp-desc">Developed the SARIT object-detection system on Raspberry Pi 4 (Python, OpenCV, SSD MobileNet) and a Flask fleet-management web app. Showcased at the Canadian International AutoShow 2023.</div>
+      <a class="exp-item" href="SARIT_Object_Detection_Report.pdf" target="_blank">
+        <div class="exp-year">2023 → 2024</div>
+        <div class="exp-body">
+          <div class="exp-title">Lassonde Engineering <span class="role">Research Assistant</span><span class="ext">↗</span></div>
+          <div class="exp-role">SARIT Micromobility EV Project.</div>
+          <div class="exp-detail">Developed the SARIT object-detection system on Raspberry Pi 4 (Python, OpenCV, SSD MobileNet) and a Flask fleet-management web app. Showcased at the Canadian International AutoShow 2023.</div>
+        </div>
+        <div class="exp-meta">PDF</div>
       </a>
-      <a class="xp-entry" href="https://www.wombo.ai/" target="_blank" rel="noopener">
-        <div class="xp-role">Content Intern <span class="xp-ext">↗</span></div>
-        <div class="xp-company">WOMBO Inc.</div>
-        <div class="xp-dates">2022 — 2023</div>
-        <div class="xp-loc">Toronto, ON</div>
-        <div class="xp-desc">Collected and annotated AI training data for the image and lip-sync pipelines, edited videos in Premiere Pro, and ran the Instagram and TikTok accounts for a studio with 200M+ downloads.</div>
+      <a class="exp-item" href="https://www.wombo.ai/" target="_blank" rel="noopener">
+        <div class="exp-year">2022 → 2023</div>
+        <div class="exp-body">
+          <div class="exp-title">WOMBO Inc. <span class="role">Content Intern</span><span class="ext">↗</span></div>
+          <div class="exp-role">Studio behind Dream by WOMBO.</div>
+          <div class="exp-detail">Collected and annotated AI training data for the image and lip-sync pipelines. Edited videos in Premiere Pro and ran the Instagram and TikTok accounts.</div>
+        </div>
+        <div class="exp-meta">Toronto</div>
       </a>
     </div>
   </div>
