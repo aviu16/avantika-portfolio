@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@300..800&family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
 
 <style>
   :root {
@@ -936,6 +937,116 @@
     letter-spacing: -0.022em;
   }
   .subsection-title .accent { color: var(--accent); }
+
+  /* === SKILLS GRID — clean categorized columns w/ devicon icons === */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px 40px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 28px;
+    padding: 40px 44px;
+    box-shadow: 0 6px 18px rgba(26, 34, 51, 0.08), 0 18px 42px rgba(26, 34, 51, 0.10);
+  }
+  body[data-theme="dark"] .skills-grid {
+    background: linear-gradient(180deg, rgba(20,28,48,0.6) 0%, rgba(14,20,34,0.58) 100%);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3), 0 18px 42px rgba(0,0,0,0.34);
+  }
+  .skills-cat {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule, rgba(0,0,0,0.10));
+  }
+  body[data-theme="dark"] .skills-cat { color: #F2F4F9; border-bottom-color: rgba(255,255,255,0.12); }
+  .skills-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
+  .skills-items li {
+    display: flex; align-items: center; gap: 11px;
+    font-family: var(--body);
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  body[data-theme="dark"] .skills-items li { color: #E8EBF1; }
+  .skills-items li i {
+    font-size: 19px;
+    width: 22px; text-align: center;
+    color: var(--ink);
+    opacity: 0.78;
+    flex-shrink: 0;
+  }
+  body[data-theme="dark"] .skills-items li i { color: #E8EBF1; opacity: 0.85; }
+  @media (max-width: 880px) {
+    .skills-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; padding: 32px 28px; }
+  }
+  @media (max-width: 520px) {
+    .skills-grid { grid-template-columns: 1fr; }
+  }
+
+  /* === EXPERIENCE — clean stacked entries (Jason-style) === */
+  .xp-list { display: flex; flex-direction: column; gap: 8px; }
+  .xp-entry {
+    display: block;
+    text-decoration: none;
+    padding: 24px 26px;
+    border-radius: 18px;
+    transition: background 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+  }
+  .xp-entry:hover {
+    background: rgba(255, 255, 255, 0.45);
+    transform: translateX(4px);
+  }
+  body[data-theme="dark"] .xp-entry:hover { background: rgba(255, 255, 255, 0.06); }
+  .xp-role {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  body[data-theme="dark"] .xp-role { color: #F2F4F9; }
+  .xp-ext {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .xp-entry:hover .xp-ext { opacity: 0.7; }
+  .xp-company {
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 3px;
+    letter-spacing: -0.01em;
+  }
+  body[data-theme="dark"] .xp-company { color: #D6DCE8; }
+  .xp-dates, .xp-loc {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.01em;
+    margin-top: 4px;
+  }
+  .xp-loc { margin-top: 1px; }
+  .xp-desc {
+    font-family: var(--body);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    max-width: 720px;
+    letter-spacing: -0.005em;
+  }
 
   /* === ABOUT === */
   .about-headline {
@@ -2752,6 +2863,7 @@
     <!-- Scroll mode nav — links to page sections -->
     <div class="nav-links nav-scroll">
       <a href="#about" data-section="about">About</a>
+      <a href="#skills" data-section="skills">Skills</a>
       <a href="#experience" data-section="experience">Experience</a>
       <a href="#projects" data-section="projects">Projects</a>
       <a href="#wetlab" data-section="wetlab">Wet Lab</a>
@@ -2849,56 +2961,108 @@
   </div>
 </section>
 
-<!-- ===== 02 · WORK EXPERIENCE ===== -->
+<!-- ===== 02 · SKILLS ===== -->
+<section id="skills">
+  <div class="wrap">
+    <div class="section-meta"><span class="num">02.</span><span>skills</span><span class="line"></span></div>
+    <h2><span class="accent">Skills.</span></h2>
+    <div class="skills-grid">
+      <div class="skills-col">
+        <h3 class="skills-cat">Languages</h3>
+        <ul class="skills-items">
+          <li><i class="devicon-python-plain"></i>Python</li>
+          <li><i class="devicon-typescript-plain"></i>TypeScript</li>
+          <li><i class="devicon-javascript-plain"></i>JavaScript</li>
+          <li><i class="devicon-swift-plain"></i>Swift</li>
+          <li><i class="devicon-php-plain"></i>PHP</li>
+          <li><i class="devicon-r-plain"></i>R</li>
+          <li><i class="devicon-bash-plain"></i>Bash</li>
+          <li><i class="devicon-mysql-plain"></i>SQL</li>
+        </ul>
+      </div>
+      <div class="skills-col">
+        <h3 class="skills-cat">Frameworks</h3>
+        <ul class="skills-items">
+          <li><i class="devicon-react-original"></i>React</li>
+          <li><i class="devicon-swift-plain"></i>SwiftUI</li>
+          <li><i class="devicon-electron-original"></i>Electron</li>
+          <li><i class="devicon-flask-original"></i>Flask</li>
+          <li><i class="devicon-fastapi-plain"></i>FastAPI</li>
+          <li><i class="devicon-tailwindcss-original"></i>Tailwind</li>
+          <li><i class="devicon-opencv-plain"></i>OpenCV</li>
+          <li><i class="devicon-openai-original"></i>OpenAI API</li>
+        </ul>
+      </div>
+      <div class="skills-col">
+        <h3 class="skills-cat">Data</h3>
+        <ul class="skills-items">
+          <li><i class="devicon-postgresql-plain"></i>PostgreSQL</li>
+          <li><i class="devicon-pandas-original"></i>pandas</li>
+          <li><i class="devicon-numpy-original"></i>NumPy</li>
+          <li><i class="devicon-scikitlearn-plain"></i>scikit-learn</li>
+          <li><i class="devicon-apachekafka-original"></i>Airflow</li>
+          <li><i class="devicon-snowflake-original"></i>Snowflake</li>
+          <li><i class="devicon-dbt-plain"></i>dbt</li>
+          <li><i class="devicon-grafana-original"></i>Power BI</li>
+        </ul>
+      </div>
+      <div class="skills-col">
+        <h3 class="skills-cat">Tools</h3>
+        <ul class="skills-items">
+          <li><i class="devicon-git-plain"></i>Git</li>
+          <li><i class="devicon-github-original"></i>GitHub Actions</li>
+          <li><i class="devicon-docker-plain"></i>Docker</li>
+          <li><i class="devicon-amazonwebservices-plain-wordmark"></i>AWS</li>
+          <li><i class="devicon-googlecloud-plain"></i>GCP</li>
+          <li><i class="devicon-vscode-plain"></i>VS Code</li>
+          <li><i class="devicon-jira-plain"></i>JIRA</li>
+          <li><i class="devicon-latex-original"></i>LaTeX</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 · WORK EXPERIENCE ===== -->
 <section id="experience">
   <div class="wrap">
-    <div class="section-meta"><span class="num">02.</span><span>work experience</span><span class="line"></span></div>
+    <div class="section-meta"><span class="num">03.</span><span>work experience</span><span class="line"></span></div>
     <h2>Work <span class="accent">experience.</span></h2>
-    <div class="exp-list">
-      <a class="exp-item" href="https://www.omega.inc/" target="_blank" rel="noopener">
-        <div class="exp-year">2024 → 2026</div>
-        <div class="exp-body">
-          <div class="exp-title">OMEGA Labs <span class="role">— Data Engineer</span><span class="ext">↗</span></div>
-          <div class="exp-role">AI startup on the Bittensor decentralized network. Focus, Muse, multimodal models.</div>
-          <div class="exp-detail">Reviewed PRs across the data backend (FastAPI, PostgreSQL, SQLAlchemy, Alembic) and AI agent stack. Shipped a date-navigation feature in the Focus desktop app (Electron, React, TypeScript, Redux). Ran sprint coordination on JIRA and Confluence.</div>
-        </div>
-        <div class="exp-meta">omega.inc</div>
+    <div class="xp-list">
+      <a class="xp-entry" href="https://www.omega.inc/" target="_blank" rel="noopener">
+        <div class="xp-role">Data Engineer <span class="xp-ext">↗</span></div>
+        <div class="xp-company">OMEGA Labs</div>
+        <div class="xp-dates">2024 — 2026</div>
+        <div class="xp-loc">Toronto, ON · Remote</div>
+        <div class="xp-desc">Reviewed PRs across the data backend (FastAPI, PostgreSQL, SQLAlchemy) and AI agent stack, and shipped a date-navigation feature in the Focus desktop app (Electron, React, TypeScript).</div>
       </a>
-      <a class="exp-item" href="https://www.sanofi.com/" target="_blank" rel="noopener">
-        <div class="exp-year">2024 → 2025</div>
-        <div class="exp-body">
-          <div class="exp-title">Sanofi Pasteur <span class="role">— B92 M&amp;S Co-Op</span><span class="ext">↗</span></div>
-          <div class="exp-role">Formulations, Media, Washing &amp; Sterilizing. cGMP, FDA &amp; Health Canada inspected.</div>
-          <div class="exp-detail">Built a Python batch-printing automation tool and Excel/VBA validation workbook for SMS compliance. Managed lifecycle data for 100+ IPV assets in SAP iShift. Led the CCR project for stainless mesh filter removal through formal change-control.</div>
-        </div>
-        <div class="exp-meta">Toronto</div>
+      <a class="xp-entry" href="https://www.yorku.ca/research/biomotionlab/" target="_blank" rel="noopener">
+        <div class="xp-role">Research Assistant <span class="xp-ext">↗</span></div>
+        <div class="xp-company">BioMotion Lab — York University</div>
+        <div class="xp-dates">2025 — 2026</div>
+        <div class="xp-loc">Toronto, ON</div>
+        <div class="xp-desc">Designed a normalized MySQL schema and PHP backend for the body-image experiment, built Python/R ETL pipelines for thesis data, and rebuilt the lab website on WordPress.</div>
       </a>
-      <a class="exp-item" href="https://www.yorku.ca/research/biomotionlab/" target="_blank" rel="noopener">
-        <div class="exp-year">2025 → 2026</div>
-        <div class="exp-body">
-          <div class="exp-title">BioMotion Lab <span class="role">— Research Assistant</span><span class="ext">↗</span></div>
-          <div class="exp-role">Centre for Vision Research. Prof. Nikolaus Troje.</div>
-          <div class="exp-detail">Designed a normalized MySQL schema and PHP backend for the body-image experiment. Built Python ETL pipelines for thesis data in Python and R / RStudio. Rebuilt the lab website on WordPress and managed all lab data on SiteGround.</div>
-        </div>
-        <div class="exp-meta">York U</div>
+      <a class="xp-entry" href="https://www.sanofi.com/" target="_blank" rel="noopener">
+        <div class="xp-role">B92 M&amp;S Co-Op <span class="xp-ext">↗</span></div>
+        <div class="xp-company">Sanofi Pasteur</div>
+        <div class="xp-dates">2024 — 2025</div>
+        <div class="xp-loc">Toronto, ON</div>
+        <div class="xp-desc">Built a Python batch-printing tool and Excel/VBA validation workbook for cGMP compliance, managed lifecycle data for 100+ IPV assets in SAP iShift, and led a formal change-control project.</div>
       </a>
-      <a class="exp-item" href="SARIT_Object_Detection_Report.pdf" target="_blank">
-        <div class="exp-year">2023 → 2024</div>
-        <div class="exp-body">
-          <div class="exp-title">Lassonde Engineering <span class="role">— Research Assistant</span><span class="ext">↗</span></div>
-          <div class="exp-role">SARIT Micromobility EV Project. Lassonde Undergraduate Research Award.</div>
-          <div class="exp-detail">Developed the SARIT Object Detection System on Raspberry Pi 4 (Python, OpenCV, SSD MobileNet) and the Fleet Management Web App (Python, Flask, MySQL, SQLAlchemy, Leaflet.js, SendGrid, Alembic). Showcased at Canadian International AutoShow 2023.</div>
-        </div>
-        <div class="exp-meta">PDF</div>
+      <a class="xp-entry" href="SARIT_Object_Detection_Report.pdf" target="_blank">
+        <div class="xp-role">Research Assistant <span class="xp-ext">↗</span></div>
+        <div class="xp-company">Lassonde Engineering — York University</div>
+        <div class="xp-dates">2023 — 2024</div>
+        <div class="xp-loc">Toronto, ON</div>
+        <div class="xp-desc">Developed the SARIT object-detection system on Raspberry Pi 4 (Python, OpenCV, SSD MobileNet) and a Flask fleet-management web app. Showcased at the Canadian International AutoShow 2023.</div>
       </a>
-      <a class="exp-item" href="https://www.wombo.ai/" target="_blank" rel="noopener">
-        <div class="exp-year">2022 → 2023</div>
-        <div class="exp-body">
-          <div class="exp-title">WOMBO Inc. <span class="role">— Content Intern</span><span class="ext">↗</span></div>
-          <div class="exp-role">Studio behind Dream by WOMBO. Google Play Best of 2022. 200M+ downloads.</div>
-          <div class="exp-detail">Collected and annotated AI training data for the image and lip-sync pipelines. Edited deepfake videos in Adobe Premier Pro, ran the Instagram and TikTok accounts, analyzed user-acquisition in Google Analytics.</div>
-        </div>
-        <div class="exp-meta">Toronto</div>
+      <a class="xp-entry" href="https://www.wombo.ai/" target="_blank" rel="noopener">
+        <div class="xp-role">Content Intern <span class="xp-ext">↗</span></div>
+        <div class="xp-company">WOMBO Inc.</div>
+        <div class="xp-dates">2022 — 2023</div>
+        <div class="xp-loc">Toronto, ON</div>
+        <div class="xp-desc">Collected and annotated AI training data for the image and lip-sync pipelines, edited videos in Premiere Pro, and ran the Instagram and TikTok accounts for a studio with 200M+ downloads.</div>
       </a>
     </div>
   </div>
@@ -2907,7 +3071,7 @@
 <!-- ===== 03 · PROJECTS ===== -->
 <section id="projects">
   <div class="wrap">
-    <div class="section-meta"><span class="num">03.</span><span>projects</span><span class="line"></span></div>
+    <div class="section-meta"><span class="num">04.</span><span>projects</span><span class="line"></span></div>
     <h2><span class="accent">Projects.</span></h2>
     <div class="projects">
 
@@ -2943,46 +3107,13 @@
 
     </div>
 
-    <!-- Digital toolkit — one compact card, four labeled rows -->
-    <div class="digital-stack">
-      <div class="stack-header">
-        <div class="stack-eyebrow">// toolkit</div>
-        <h3 class="stack-title">What I work with.</h3>
-      </div>
-      <div class="stack-grid">
-        <div class="stack-row">
-          <div class="stack-label">code</div>
-          <div class="stack-chips">
-            <span class="skill-chip">Python</span><span class="skill-chip">SQL</span><span class="skill-chip">R</span><span class="skill-chip">TypeScript</span><span class="skill-chip">JavaScript</span><span class="skill-chip">Swift</span><span class="skill-chip">PHP</span><span class="skill-chip">VBA</span><span class="skill-chip">Bash</span>
-          </div>
-        </div>
-        <div class="stack-row">
-          <div class="stack-label">build</div>
-          <div class="stack-chips">
-            <span class="skill-chip">React</span><span class="skill-chip">SwiftUI</span><span class="skill-chip">Electron</span><span class="skill-chip">Flask</span><span class="skill-chip">FastAPI</span><span class="skill-chip">Tailwind</span><span class="skill-chip">OpenAI API</span><span class="skill-chip">OpenCV</span>
-          </div>
-        </div>
-        <div class="stack-row">
-          <div class="stack-label">data</div>
-          <div class="stack-chips">
-            <span class="skill-chip">PostgreSQL</span><span class="skill-chip">Snowflake</span><span class="skill-chip">dbt</span><span class="skill-chip">Airflow</span><span class="skill-chip">pandas</span><span class="skill-chip">NumPy</span><span class="skill-chip">scikit-learn</span><span class="skill-chip">statsmodels</span>
-          </div>
-        </div>
-        <div class="stack-row">
-          <div class="stack-label">ship</div>
-          <div class="stack-chips">
-            <span class="skill-chip">AWS</span><span class="skill-chip">GCP</span><span class="skill-chip">Docker</span><span class="skill-chip">Git</span><span class="skill-chip">GitHub Actions</span><span class="skill-chip">Power BI</span>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
 <!-- ===== 04 · WET SCIENCE LAB ===== -->
 <section id="wetlab">
   <div class="wrap">
-    <div class="section-meta"><span class="num">04.</span><span>wet science lab</span><span class="line"></span></div>
+    <div class="section-meta"><span class="num">05.</span><span>wet science lab</span><span class="line"></span></div>
     <h2>Wet science <span class="accent">lab.</span></h2>
     <p style="font-family:var(--body); font-size:16px; color:var(--ink-soft); max-width:640px; margin-top:-8px; margin-bottom:8px;">A year of CRISPR knockouts, mRNA synthesis, MAPK westerns, and an honours thesis. Click to expand the full lab notebook.</p>
 
@@ -3173,7 +3304,7 @@
 <!-- ===== 05 · DISCIPLINES ===== -->
 <section id="disciplines">
   <div class="wrap">
-    <div class="section-meta"><span class="num">05.</span><span>disciplines</span><span class="line"></span></div>
+    <div class="section-meta"><span class="num">06.</span><span>disciplines</span><span class="line"></span></div>
     <h2>I float <span class="accent">between.</span></h2>
     <p class="disciplines">
       <span>biotechnology</span><span class="sep">·</span><span>molecular biology</span><span class="sep">·</span><span>CRISPR / genetic engineering</span><span class="sep">·</span><span>synthetic biology</span><span class="sep">·</span><span>immunology</span><span class="sep">·</span><span>cell biology</span><span class="sep">·</span><span>bioinformatics</span><span class="sep">·</span><span>vision research</span><span class="sep">·</span><span>cGMP &amp; regulated data</span><span class="sep">·</span><span>data engineering</span><span class="sep">·</span><span>AI &amp; ML</span><span class="sep">·</span><span>full-stack web</span><span class="sep">·</span><span>iOS development</span><span class="sep">·</span><span>statistical modeling</span><span class="sep">·</span><span>content &amp; design</span><span class="sep">·</span><span>photography</span>.
